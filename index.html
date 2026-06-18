@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识数据中台 · Knowledge Data Hub</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.7.3/dist/index.css">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.7.3/theme-chalk/dark/css-vars.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--primary:#409EFF;--primary-dark:#337ECC;--success:#67C23A;--warning:#E6A23C;--danger:#F56C6C;--info:#909399;--sidebar-width:220px;--header-height:56px;--detail-width:480px;--transition:all .3s cubic-bezier(.4,0,.2,1)}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif}
+    #app{height:100%}
+    .app-container{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    .app-header{height:var(--header-height);background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;padding:0 20px;color:#fff;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+    .app-header.dark{background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#21262d 100%)}
+    .app-body{display:flex;flex:1;overflow:hidden}
+    .app-sidebar{width:var(--sidebar-width);background:#fff;border-right:1px solid #e8e8e8;overflow-y:auto;transition:var(--transition);flex-shrink:0}
+    html.dark .app-sidebar{background:#1d1e1f;border-color:#363637}
+    .app-sidebar.collapsed{width:64px}
+    .app-sidebar.collapsed .menu-text{display:none}
+    .app-sidebar.collapsed .el-menu{width:64px}
+    .sidebar-logo{height:48px;display:flex;align-items:center;padding:0 16px;gap:10px;border-bottom:1px solid #e8e8e8;cursor:pointer}
+    html.dark .sidebar-logo{border-color:#363637}
+    .sidebar-logo .logo-icon{font-size:22px;color:var(--primary)}
+    .sidebar-logo .logo-text{font-size:15px;font-weight:700;color:#303133;white-space:nowrap}
+    html.dark .sidebar-logo .logo-text{color:#e5eaf3}
+    .app-main{flex:1;overflow:auto;background:#f5f7fa;padding:16px}
+    html.dark .app-main{background:#141414}
+    .header-left{display:flex;align-items:center;gap:16px;flex:1}
+    .header-logo{display:flex;align-items:center;gap:8px}
+    .header-logo i{font-size:24px;color:#67C8FF}
+    .header-logo span{font-size:16px;font-weight:700;letter-spacing:1px}
+    .header-search{max-width:480px;flex:1}
+    .header-search .el-input__wrapper{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff}
+    .header-search .el-input__inner{color:#fff}
+    .header-search .el-input__inner::placeholder{color:rgba(255,255,255,.5)}
+    .header-right{display:flex;align-items:center;gap:16px}
+    .header-btn{cursor:pointer;color:rgba(255,255,255,.8);font-size:18px;transition:var(--transition);padding:6px;border-radius:6px}
+    .header-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+    .header-user{display:flex;align-items:center;gap:8px;cursor:pointer;color:rgba(255,255,255,.9)}
+    .header-user .el-avatar{border:2px solid rgba(255,255,255,.3)}
+    .notif-panel{position:absolute;top:56px;right:16px;width:380px;max-height:480px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;z-index:2000;border:1px solid #ebeef5}
+    html.dark .notif-panel{background:#1d1e1f;border-color:#363637}
+    .notif-header{padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+    html.dark .notif-header{border-color:#363637}
+    .notif-header .nh-title{font-size:14px;font-weight:700;color:#303133}
+    html.dark .notif-header .nh-title{color:#e5eaf3}
+    .notif-list{max-height:380px;overflow-y:auto}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:var(--transition);display:flex;gap:10px;align-items:flex-start}
+    html.dark .notif-item{border-color:#2c2c2c}
+    .notif-item:hover{background:#f0f7ff}
+    html.dark .notif-item:hover{background:#1a2a3c}
+    .notif-item .ni-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+    .notif-item .ni-body{flex:1;min-width:0}
+    .notif-item .ni-text{font-size:13px;color:#303133;line-height:1.5}
+    html.dark .notif-item .ni-text{color:#e5eaf3}
+    .notif-item .ni-time{font-size:11px;color:#909399;margin-top:4px}
+    .notif-item.read{opacity:.55}
+    .notif-empty{padding:40px 20px;text-align:center;color:#909399;font-size:13px}
+    .flow-overview{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #ebeef5}
+    html.dark .flow-overview{background:#1d1e1f;border-color:#363637}
+    .flow-title{font-size:14px;font-weight:700;color:#303133;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    html.dark .flow-title{color:#e5eaf3}
+    .flow-main{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:12px}
+    .flow-node{background:linear-gradient(135deg,#ecf5ff,#f0f9eb);border:1px solid #d9ecff;border-radius:10px;padding:10px 16px;min-width:140px;text-align:center;flex-shrink:0;cursor:pointer;transition:var(--transition)}
+    .flow-node:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(64,158,255,.2);border-color:var(--primary)}
+    html.dark .flow-node{background:#1a2a3c;border-color:#2a4a6c}
+    .flow-node .node-label{font-size:12px;color:#909399;margin-bottom:2px}
+    .flow-node .node-value{font-size:18px;font-weight:800;color:#409EFF}
+    .flow-node .node-sub{font-size:10px;color:#b0b5bd}
+    .flow-arrow{color:#c0c4cc;font-size:18px;flex-shrink:0}
+    .flow-audit{margin-top:10px;background:#fdf6ec;border:1px solid #faecd8;border-radius:8px;padding:8px 16px;text-align:center;font-size:12px;color:#E6A23C;font-weight:500;cursor:pointer}
+    html.dark .flow-audit{background:#3a2a1a;border-color:#5a4a3a;color:#E6A23C}
+    .stat-card{background:#fff;border-radius:12px;padding:20px;position:relative;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);transition:var(--transition);cursor:pointer}
+    html.dark .stat-card{background:#1d1e1f;box-shadow:0 1px 6px rgba(0,0,0,.2)}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+    .stat-card .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin-bottom:12px}
+    .stat-card .stat-value{font-size:28px;font-weight:900;color:#303133;line-height:1.2}
+    html.dark .stat-card .stat-value{color:#e5eaf3}
+    .stat-card .stat-label{font-size:13px;color:#909399;margin-top:4px}
+    .stat-card .stat-trend{font-size:12px;margin-top:8px;display:flex;align-items:center;gap:4px}
+    .stat-card .stat-bg{position:absolute;right:-10px;bottom:-10px;font-size:80px;opacity:.04}
+    .stat-card .stat-drill{position:absolute;top:16px;right:16px;font-size:11px;color:#409EFF;opacity:0;transition:var(--transition)}
+    .stat-card:hover .stat-drill{opacity:1}
+    .catalog-layout{display:flex;height:calc(100vh - var(--header-height) - 32px);gap:12px}
+    .catalog-left{width:260px;flex-shrink:0;background:#fff;border-radius:10px;overflow-y:auto;padding:12px}
+    html.dark .catalog-left{background:#1d1e1f}
+    .catalog-center{flex:1;background:#fff;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+    html.dark .catalog-center{background:#1d1e1f}
+    .catalog-right{width:0;background:#fff;border-radius:10px;overflow:hidden;transition:width .35s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+    html.dark .catalog-right{background:#1d1e1f}
+    .catalog-right.open{width:var(--detail-width)}
+    .topic-tree .topic-node{display:flex;align-items:center;padding:8px 12px;border-radius:8px;cursor:pointer;transition:var(--transition);margin-bottom:2px}
+    .topic-tree .topic-node:hover{background:#f0f5ff}
+    .topic-tree .topic-node.active{background:#ecf5ff;color:var(--primary)}
+    html.dark .topic-tree .topic-node:hover{background:#262727}
+    html.dark .topic-tree .topic-node.active{background:#1a3a5c}
+    .topic-tree .topic-icon{margin-right:8px;font-size:16px}
+    .topic-tree .topic-name{flex:1;font-size:13px;font-weight:500}
+    .topic-tree .topic-count{font-size:11px;color:#909399;background:#f0f2f5;padding:2px 8px;border-radius:10px}
+    html.dark .topic-tree .topic-count{background:#2c2c2c}
+    .asset-toolbar{padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    html.dark .asset-toolbar{border-color:#363637}
+    .asset-list{flex:1;overflow-y:auto;padding:12px}
+    .asset-card{border:1px solid #ebeef5;border-radius:10px;padding:14px 16px;cursor:pointer;transition:var(--transition);margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+    .asset-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(64,158,255,.1)}
+    .asset-card.active{border-color:var(--primary);background:#f0f7ff}
+    html.dark .asset-card{border-color:#363637}
+    html.dark .asset-card:hover{border-color:var(--primary)}
+    html.dark .asset-card.active{background:#1a3a5c;border-color:var(--primary)}
+    .asset-card .asset-type-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .asset-card .asset-info{flex:1;min-width:0}
+    .asset-card .asset-name{font-size:14px;font-weight:600;color:#303133;margin-bottom:4px}
+    html.dark .asset-card .asset-name{color:#e5eaf3}
+    .asset-card .asset-meta{font-size:12px;color:#909399;display:flex;gap:12px;flex-wrap:wrap}
+    .asset-card .asset-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+    .detail-panel{padding:16px 20px;overflow-y:auto;height:100%}
+    .detail-panel .detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .detail-panel .detail-title{font-size:16px;font-weight:700;color:#303133}
+    html.dark .detail-panel .detail-title{color:#e5eaf3}
+    .detail-field{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid #f5f5f5}
+    html.dark .detail-field{border-color:#2c2c2c}
+    .detail-field .field-label{color:#909399;flex-shrink:0;width:100px}
+    .detail-field .field-value{color:#303133;font-weight:500;flex:1;text-align:right;word-break:break-all}
+    html.dark .detail-field .field-value{color:#e5eaf3}
+    .detail-tab-content{font-size:12px}
+    .biz-desc-card{background:linear-gradient(135deg,#f0f7ff,#fafcff);border:1px solid #d9ecff;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+    html.dark .biz-desc-card{background:#1a2a3c;border-color:#2a4a6c}
+    .biz-desc-card i{color:#409EFF;font-size:16px;flex-shrink:0}
+    .biz-desc-card span{font-size:13px;color:#606266;line-height:1.6}
+    html.dark .biz-desc-card span{color:#c0c6d0}
+    .top-tip-bar{background:linear-gradient(135deg,#ecf5ff,#f0f9eb);border:1px solid #d9ecff;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:#409EFF}
+    html.dark .top-tip-bar{background:#1a2a3c;border-color:#2a4a6c}
+    .calibration-layout{display:flex;flex-direction:column;height:calc(100vh - var(--header-height) - 32px)}
+    .calibration-header{background:#fff;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:16px}
+    html.dark .calibration-header{background:#1d1e1f}
+    .calibration-body{display:flex;flex:1;gap:12px;overflow:hidden}
+    .calibration-pdf{flex:1;background:#fff;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+    html.dark .calibration-pdf{background:#1d1e1f}
+    .calibration-struct{flex:1;background:#fff;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+    html.dark .calibration-struct{background:#1d1e1f}
+    .calibration-footer{background:#fff;border-radius:10px;padding:10px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
+    html.dark .calibration-footer{background:#1d1e1f}
+    .pdf-preview{flex:1;background:#525659;display:flex;align-items:center;justify-content:center;position:relative;overflow:auto;padding:20px}
+    .pdf-page{background:#fff;width:100%;max-width:600px;aspect-ratio:210/297;padding:40px;font-size:12px;line-height:1.8;position:relative;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+    .pdf-page .pdf-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:16px;color:#303133}
+    .pdf-page .pdf-heading2{font-size:14px;font-weight:700;margin:12px 0 6px;color:#303133}
+    .pdf-page .pdf-para{text-indent:2em;margin-bottom:8px;color:#333}
+    .pdf-page .pdf-highlight{background:rgba(64,158,255,.2);border-radius:2px;padding:0 2px}
+    .struct-chapters{border-bottom:1px solid #ebeef5;padding:8px 12px;max-height:180px;overflow-y:auto}
+    html.dark .struct-chapters{border-color:#363637}
+    .struct-chapter-item{padding:4px 8px;font-size:12px;cursor:pointer;border-radius:4px;color:#606266;transition:var(--transition)}
+    .struct-chapter-item:hover{background:#f0f5ff;color:var(--primary)}
+    .struct-chapter-item.active{background:#ecf5ff;color:var(--primary);font-weight:600}
+    html.dark .struct-chapter-item:hover{background:#262727}
+    html.dark .struct-chapter-item.active{background:#1a3a5c}
+    .struct-list{flex:1;overflow-y:auto;padding:12px}
+    .struct-item{border:1px solid #ebeef5;border-radius:8px;padding:10px 12px;margin-bottom:8px;transition:var(--transition)}
+    .struct-item:hover{border-color:var(--primary);background:#f0f7ff}
+    html.dark .struct-item{border-color:#363637}
+    html.dark .struct-item:hover{background:#1a3a5c;border-color:var(--primary)}
+    .struct-item .struct-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .struct-item .struct-text{font-size:13px;color:#606266;line-height:1.6}
+    html.dark .struct-item .struct-text{color:#cfd3dc}
+    .struct-item .struct-actions{display:flex;gap:4px;margin-top:6px}
+    .search-hero{text-align:center;padding:20px 20px 10px}
+    .search-hero h2{font-size:28px;font-weight:900;margin-bottom:8px}
+    .search-box{max-width:640px;margin:0 auto 20px}
+    .search-tabs{display:flex;justify-content:center;gap:24px;margin-bottom:24px}
+    .search-tab{font-size:14px;color:#909399;cursor:pointer;padding:6px 12px;border-radius:6px;transition:var(--transition)}
+    .search-tab:hover{color:var(--primary)}
+    .search-tab.active{color:var(--primary);font-weight:600;background:#ecf5ff}
+    html.dark .search-tab.active{background:#1a3a5c}
+    .search-facets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+    .search-results{max-width:900px;margin:0 auto}
+    .search-result-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:12px;border:1px solid #ebeef5;transition:var(--transition)}
+    html.dark .search-result-card{background:#1d1e1f;border-color:#363637}
+    .search-result-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(64,158,255,.08)}
+    .result-source{font-size:12px;color:#909399;margin-bottom:4px}
+    .result-title{font-size:15px;font-weight:600;color:#303133;margin-bottom:6px}
+    html.dark .result-title{color:#e5eaf3}
+    .result-snippet{font-size:13px;color:#606266;line-height:1.7}
+    html.dark .result-snippet{color:#cfd3dc}
+    .result-meta{display:flex;gap:12px;margin-top:8px;font-size:12px;color:#909399}
+    .result-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed #ebeef5}
+    html.dark .result-actions{border-color:#363637}
+    .rag-container{display:flex;height:calc(100vh - var(--header-height) - 32px)}
+    .rag-sidebar{width:280px;background:#fff;border-radius:10px;margin-right:12px;padding:16px;overflow-y:auto}
+    html.dark .rag-sidebar{background:#1d1e1f}
+    .rag-main{flex:1;background:#fff;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+    html.dark .rag-main{background:#1d1e1f}
+    .chat-messages{flex:1;overflow-y:auto;padding:20px}
+    .chat-msg{display:flex;gap:12px;margin-bottom:16px}
+    .chat-msg.user{flex-direction:row-reverse}
+    .chat-msg .msg-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+    .chat-msg .msg-bubble{max-width:70%;padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7}
+    .chat-msg.assistant .msg-bubble{background:#f4f6f8;color:#303133}
+    .chat-msg.user .msg-bubble{background:var(--primary);color:#fff}
+    html.dark .chat-msg.assistant .msg-bubble{background:#2c2c2c;color:#e5eaf3}
+    .citation-card{background:#f0f7ff;border:1px solid #d9ecff;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:#409EFF;cursor:pointer;transition:var(--transition)}
+    .citation-card:hover{background:#d9ecff}
+    html.dark .citation-card{background:#1a3a5c;border-color:#2a5a8c}
+    html.dark .citation-card:hover{background:#2a4a6c}
+    .chat-input{padding:16px;border-top:1px solid #ebeef5;display:flex;gap:8px}
+    html.dark .chat-input{border-color:#363637}
+    .rag-process{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#f4f6f8;border-radius:8px;font-size:12px;color:#606266;margin-bottom:12px}
+    html.dark .rag-process{background:#2c2c2c;color:#c0c6d0}
+    .rag-process .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#409EFF;animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+    .retrieval-evidence{background:#f9fafb;border:1px solid #e4e7eb;border-radius:10px;margin-top:12px;padding:14px 16px;font-size:12px}
+    html.dark .retrieval-evidence{background:#252728;border-color:#3a3c3d}
+    .retrieval-evidence .ev-title{font-weight:700;font-size:13px;color:#303133;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    html.dark .retrieval-evidence .ev-title{color:#e5eaf3}
+    .retrieval-evidence .ev-field{display:flex;gap:8px;margin-bottom:6px;color:#606266}
+    html.dark .retrieval-evidence .ev-field{color:#c0c6d0}
+    .retrieval-evidence .ev-field .ev-label{width:80px;color:#909399;flex-shrink:0}
+    .retrieval-evidence .ev-table{width:100%;border-collapse:collapse;margin-top:8px}
+    .retrieval-evidence .ev-table th{background:#f0f2f5;padding:4px 8px;text-align:left;font-weight:600;font-size:11px;color:#606266;border:1px solid #e8e8e8}
+    .retrieval-evidence .ev-table td{padding:4px 8px;font-size:11px;color:#606266;border:1px solid #e8e8e8}
+    html.dark .retrieval-evidence .ev-table th{background:#2c2c2c;border-color:#3a3a3a;color:#a3a6ad}
+    html.dark .retrieval-evidence .ev-table td{border-color:#3a3a3a;color:#a3a6ad}
+    .upload-zone{border:2px dashed #dcdfe6;border-radius:12px;padding:40px 20px;text-align:center;transition:var(--transition);cursor:pointer}
+    .upload-zone:hover{border-color:var(--primary);background:#f0f7ff}
+    html.dark .upload-zone:hover{background:#1a3a5c}
+    .upload-zone i{font-size:48px;color:#c0c4cc;margin-bottom:12px}
+    .upload-zone .upload-text{font-size:14px;color:#606266}
+    .upload-zone .upload-hint{font-size:12px;color:#909399;margin-top:8px}
+    .chart-card{background:#fff;border-radius:12px;padding:20px;border:1px solid #ebeef5}
+    html.dark .chart-card{background:#1d1e1f;border-color:#363637}
+    .chart-card .chart-title{font-size:15px;font-weight:600;color:#303133;margin-bottom:16px}
+    html.dark .chart-card .chart-title{color:#e5eaf3}
+    .risk-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #ebeef5;cursor:pointer;transition:var(--transition)}
+    html.dark .risk-card{background:#1d1e1f;border-color:#363637}
+    .risk-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    .risk-card.active{border-color:var(--primary);background:#f0f7ff}
+    html.dark .risk-card.active{background:#1a3a5c}
+    .risk-card .rc-value{font-size:24px;font-weight:900}
+    .risk-card .rc-label{font-size:12px;color:#909399;margin-top:2px}
+    .org-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #ebeef5;text-align:center}
+    html.dark .org-card{background:#1d1e1f;border-color:#363637}
+    .org-card .oc-name{font-size:13px;font-weight:600;color:#303133;margin-bottom:8px}
+    html.dark .org-card .oc-name{color:#e5eaf3}
+    .org-card .oc-stat{display:flex;justify-content:space-around}
+    .org-card .oc-stat .oc-num{font-size:20px;font-weight:800;color:#409EFF}
+    .org-card .oc-stat .oc-lbl{font-size:11px;color:#909399}
+    .page-title{font-size:18px;font-weight:700;color:#303133;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    html.dark .page-title{color:#e5eaf3}
+    .mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}.mt-12{margin-top:12px}
+    .flex-between{display:flex;align-items:center;justify-content:space-between}
+    .flex-center{display:flex;align-items:center;justify-content:center}
+    .text-primary{color:var(--primary)}.text-success{color:var(--success)}.text-warning{color:var(--warning)}.text-danger{color:var(--danger)}
+    .caliber-note{font-size:11px;color:#909399;margin-top:4px;display:inline-flex;align-items:center;gap:4px}
+    .status-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+    .status-uploaded{background:#f0f5ff;color:#409EFF}.status-checking{background:#fdf6ec;color:#E6A23C}.status-pending{background:#fef0f0;color:#F56C6C}
+    .status-registered{background:#f0f9eb;color:#67C23A}.status-structuring{background:#fdf6ec;color:#E6A23C}.status-calibrating{background:#f0f5ff;color:#409EFF}
+    .status-stored{background:#f0f9eb;color:#67C23A}.status-indexed{background:#ecf5ff;color:#337ECC}.status-auditing{background:#fdf6ec;color:#E6A23C}
+    .maturity-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+    .maturity-L0{background:#f5f5f5;color:#909399}.maturity-L1{background:#ecf5ff;color:#409EFF}.maturity-L2{background:#f0f9eb;color:#67C23A}
+    .maturity-L3{background:#fdf6ec;color:#E6A23C}.maturity-L4{background:#fef0f0;color:#F56C6C}
+    .api-group{margin-bottom:20px}
+    .api-group-title{font-size:14px;font-weight:700;color:#303133;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    html.dark .api-group-title{color:#e5eaf3}
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-thumb{background:#c0c4cc;border-radius:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb:hover{background:#909399}
+    .fade-enter-active,.fade-leave-active{transition:opacity .2s ease}
+    .fade-enter-from,.fade-leave-to{opacity:0}
+    @media(max-width:1200px){.catalog-left{width:200px}.catalog-right.open{width:400px}}
+    @media(max-width:768px){.catalog-left{display:none}.catalog-right.open{width:100%;position:absolute;right:0;top:0;bottom:0;z-index:50}}
+    html.dark{color-scheme:dark}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <header class="app-header" :class="{dark:isDark}" style="position:relative">
+        <div class="header-left">
+          <div class="header-logo"><i class="fa-solid fa-database"></i><span>知识数据中台</span></div>
+          <div class="header-search">
+            <el-input v-model="globalSearch" placeholder="搜索资源名称、ISBN、作者、关键词..." size="default" clearable @keyup.enter="onGlobalSearchEnter">
+              <template #prefix><i class="fa-solid fa-magnifying-glass" style="color:rgba(255,255,255,.5)"></i></template>
+            </el-input>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-btn" @click="toggleTheme" :title="isDark?'切换亮色':'切换暗色'"><i :class="isDark?'fa-solid fa-sun':'fa-solid fa-moon'"></i></div>
+          <div class="header-btn" @click="notifPanelOpen=!notifPanelOpen" title="通知">
+            <el-badge :value="unreadNotifCount" :max="99" :hidden="unreadNotifCount===0"><i class="fa-solid fa-bell"></i></el-badge>
+          </div>
+          <el-dropdown trigger="click">
+            <div class="header-user"><el-avatar :size="32" style="background:#409EFF">治</el-avatar><span style="font-size:13px">数据治理管理员</span><i class="fa-solid fa-chevron-down" style="font-size:10px"></i></div>
+            <template #dropdown><el-dropdown-menu><el-dropdown-item @click="currentPage='sec-audit'">操作日志</el-dropdown-item><el-dropdown-item divided>退出登录</el-dropdown-item></el-dropdown-menu></template>
+          </el-dropdown>
+        </div>
+        <transition name="fade">
+          <div v-if="notifPanelOpen" class="notif-panel" @click.stop>
+            <div class="notif-header"><span class="nh-title"><i class="fa-solid fa-bell" style="margin-right:6px;color:#409EFF"></i>通知中心</span><el-button text size="small" @click="markAllRead">全部已读</el-button></div>
+            <div class="notif-list">
+              <div v-if="store.notifications.length===0" class="notif-empty"><i class="fa-solid fa-check-double" style="font-size:28px;display:block;margin-bottom:8px;color:#67C23A"></i>暂无通知</div>
+              <div v-for="n in store.notifications" :key="n.id" class="notif-item" :class="{read:n.read}" @click="handleNotifClick(n)">
+                <div class="ni-icon" :style="{background:n.color}"><i :class="n.icon"></i></div>
+                <div class="ni-body"><div class="ni-text">{{ n.text }}</div><div class="ni-time">{{ n.time }}</div></div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </header>
+
+      <div class="app-body">
+        <aside class="app-sidebar" :class="{collapsed:sidebarCollapsed}">
+          <div class="sidebar-logo" @click="sidebarCollapsed=!sidebarCollapsed">
+            <i class="fa-solid fa-layer-group logo-icon"></i><span class="logo-text menu-text" v-show="!sidebarCollapsed">功能导航</span>
+            <i v-show="!sidebarCollapsed" :class="sidebarCollapsed?'fa-solid fa-chevron-right':'fa-solid fa-chevron-left'" style="font-size:10px;color:#909399;margin-left:auto"></i>
+          </div>
+          <el-menu :default-active="currentPage" :collapse="sidebarCollapsed" :collapse-transition="true" @select="handleMenuSelect" style="border-right:none">
+            <el-menu-item index="dashboard"><i class="fa-solid fa-chart-pie"></i><span class="menu-text">总览大屏</span></el-menu-item>
+            <el-sub-menu index="assets"><template #title><i class="fa-solid fa-box-archive"></i><span class="menu-text">数据资产</span></template><el-menu-item index="asset-catalog">资产目录</el-menu-item><el-menu-item index="asset-enrollment">资产编目</el-menu-item><el-menu-item index="asset-standards">分级分类</el-menu-item><el-menu-item index="asset-tags">标签体系</el-menu-item></el-sub-menu>
+            <el-sub-menu index="resources"><template #title><i class="fa-solid fa-cloud-arrow-up"></i><span class="menu-text">资源管理</span></template><el-menu-item index="resource-upload">资源接入</el-menu-item><el-menu-item index="resource-original">原始资源库</el-menu-item><el-menu-item index="resource-struct">成果库</el-menu-item></el-sub-menu>
+            <el-sub-menu index="struct"><template #title><i class="fa-solid fa-book-open"></i><span class="menu-text">内容结构化</span></template><el-menu-item index="struct-parse">解析引擎</el-menu-item><el-menu-item index="struct-calibrate">校准工作台</el-menu-item><el-menu-item index="struct-audit">结构化审核</el-menu-item><el-menu-item index="struct-results">结构化成果</el-menu-item></el-sub-menu>
+            <el-sub-menu index="search"><template #title><i class="fa-solid fa-magnifying-glass-chart"></i><span class="menu-text">知识检索</span></template><el-menu-item index="search-fulltext">全文检索</el-menu-item><el-menu-item index="search-semantic">语义检索</el-menu-item><el-menu-item index="search-faceted">分面导航</el-menu-item><el-menu-item index="search-hybrid">混合检索</el-menu-item></el-sub-menu>
+            <el-sub-menu index="ai"><template #title><i class="fa-solid fa-robot"></i><span class="menu-text">AI 与 RAG</span></template><el-menu-item index="ai-rag">RAG 问答</el-menu-item><el-menu-item index="ai-models">模型网关</el-menu-item><el-menu-item index="ai-agent">Agent 工作台</el-menu-item><el-menu-item index="ai-prompts">提示词库</el-menu-item></el-sub-menu>
+            <el-sub-menu index="governance"><template #title><i class="fa-solid fa-sitemap"></i><span class="menu-text">数据治理</span></template><el-menu-item index="gov-metadata">元数据管理</el-menu-item><el-menu-item index="gov-quality">数据质量</el-menu-item><el-menu-item index="gov-lineage">血缘分析</el-menu-item><el-menu-item index="gov-copyright">版权授权</el-menu-item></el-sub-menu>
+            <el-sub-menu index="security"><template #title><i class="fa-solid fa-shield-halved"></i><span class="menu-text">安全合规</span></template><el-menu-item index="sec-permission">权限管理</el-menu-item><el-menu-item index="sec-audit">审计日志</el-menu-item><el-menu-item index="sec-alert">异常预警</el-menu-item></el-sub-menu>
+            <el-sub-menu index="api"><template #title><i class="fa-solid fa-plug"></i><span class="menu-text">接口服务</span></template><el-menu-item index="api-gateway">数据网关</el-menu-item><el-menu-item index="api-callback">成果回流</el-menu-item><el-menu-item index="api-feedback">运营反馈回流</el-menu-item></el-sub-menu>
+            <el-menu-item index="settings"><i class="fa-solid fa-gear"></i><span class="menu-text">系统设置</span></el-menu-item>
+          </el-menu>
+        </aside>
+
+        <main class="app-main" @click="notifPanelOpen=false">
+          <!-- Dashboard -->
+          <div v-if="currentPage==='dashboard'">
+            <div class="page-title"><i class="fa-solid fa-chart-pie text-primary"></i> 总览大屏</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>知识数据中台运营数据概览，展示从资源接入到API服务输出的全链路运转状态。</span></div>
+            <div class="flow-overview">
+              <div class="flow-title"><i class="fa-solid fa-route text-primary"></i> 数据中台流转总览（点击节点跳转）</div>
+              <div class="flow-main">
+                <div class="flow-node" @click="currentPage='resource-upload'"><div class="node-label">资源接入</div><div class="node-value">{{ store.overview.resourceIngested.toLocaleString() }}</div><div class="node-sub">累计接入</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-node" @click="currentPage='gov-copyright'"><div class="node-label">元数据治理·含版权确权</div><div class="node-value">{{ store.overview.authorized }}</div><div class="node-sub">已确权</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-node" @click="currentPage='struct-parse'"><div class="node-label">结构化解析</div><div class="node-value">{{ structuredBookCount }}</div><div class="node-sub">已结构化图书</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-node" @click="currentPage='resource-struct'"><div class="node-label">知识库入库</div><div class="node-value">{{ store.overview.knowledgeFragments.toLocaleString() }}</div><div class="node-sub">知识片段 / 向量索引 {{ store.overview.vectorIndex.toLocaleString() }}</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-node" @click="currentPage='ai-rag'"><div class="node-label">检索·RAG问答</div><div class="node-value">{{ store.ragCallCount.toLocaleString() }}</div><div class="node-sub">今日调用</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-node" @click="currentPage='api-gateway'"><div class="node-label">API服务输出</div><div class="node-value">{{ store.overview.openApis }}</div><div class="node-sub">开放接口</div></div>
+              </div>
+              <div class="flow-audit" @click="currentPage='sec-audit'"><i class="fa-solid fa-shield-halved" style="margin-right:6px"></i> 安全合规 · 权限校验 · 操作审计（Append-Only）— 横贯全链路（点击查看审计日志）</div>
+            </div>
+            <el-row :gutter="16" class="mb-20">
+              <el-col :span="6" v-for="(stat,idx) in dashboardStats" :key="idx"><div class="stat-card" @click="drillDownStat(stat)"><div class="stat-icon" :style="{background:stat.color}"><i :class="stat.icon"></i></div><div class="stat-value">{{ stat.value }}</div><div class="stat-label">{{ stat.label }}</div><div class="stat-trend" :class="stat.trendUp?'text-success':'text-danger'"><i :class="stat.trendUp?'fa-solid fa-arrow-up':'fa-solid fa-arrow-down'"></i> {{ stat.trend }}</div><div class="stat-bg"><i :class="stat.icon"></i></div><div class="stat-drill"><i class="fa-solid fa-arrow-up-right-from-square"></i> 点击下钻</div></div></el-col>
+            </el-row>
+            <el-row :gutter="16" class="mb-16"><el-col :span="12"><div class="chart-card"><div class="chart-title">资源接入趋势</div><div id="chart-trend" style="height:280px"></div></div></el-col><el-col :span="12"><div class="chart-card"><div class="chart-title">各专题库资源分布</div><div id="chart-distribution" style="height:280px"></div></div></el-col></el-row>
+            <el-row :gutter="16"><el-col :span="8"><div class="chart-card"><div class="chart-title">加工状态分布</div><div id="chart-status" style="height:240px"></div></div></el-col><el-col :span="8"><div class="chart-card"><div class="chart-title">数据成熟度分布</div><div id="chart-quality" style="height:240px"></div></div></el-col><el-col :span="8"><div class="chart-card"><div class="chart-title">本周检索热词</div><div id="chart-keywords" style="height:240px"></div></div></el-col></el-row>
+          </div>
+
+          <!-- Asset Catalog -->
+          <div v-if="currentPage==='asset-catalog'" style="height:100%">
+            <div class="catalog-layout">
+              <div class="catalog-left"><div style="font-size:13px;font-weight:600;color:#303133;margin-bottom:12px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-folder-tree text-primary"></i> 专题库导航</div><div class="topic-tree"><div v-for="topic in topics" :key="topic.id" class="topic-node" :class="{active:activeTopic===topic.id}" @click="activeTopic=topic.id"><i :class="topic.icon" class="topic-icon" :style="{color:topic.color}"></i><span class="topic-name">{{ topic.name }}</span><span class="topic-count">{{ topic.count }}</span></div></div></div>
+              <div class="catalog-center">
+                <div class="biz-desc-card" style="margin:8px 0 0 12px"><i class="fa-solid fa-circle-info"></i><span>统一管理图书、专题资料、图片、音视频等内容资源，形成可检索、可授权、可追溯的内容资产台账。</span></div>
+                <div class="asset-toolbar">
+                  <el-input v-model="assetSearch" placeholder="搜索资产..." size="small" style="width:200px" clearable><template #prefix><i class="fa-solid fa-magnifying-glass" style="color:#909399"></i></template></el-input>
+                  <el-select v-model="filterType" size="small" placeholder="资源类型" clearable style="width:120px"><el-option v-for="t in resourceTypes" :key="t" :label="t" :value="t"></el-option></el-select>
+                  <el-select v-model="filterStatus" size="small" placeholder="加工状态" clearable style="width:120px"><el-option v-for="s in processStatuses" :key="s" :label="s" :value="s"></el-option></el-select>
+                  <el-select v-model="filterMaturity" size="small" placeholder="成熟度" clearable style="width:100px"><el-option v-for="q in maturityOptions" :key="q.val" :label="q.label" :value="q.val"></el-option></el-select>
+                  <div style="margin-left:auto;display:flex;gap:4px"><el-button :type="viewMode==='card'?'primary':''" size="small" @click="viewMode='card'"><i class="fa-solid fa-grip"></i></el-button><el-button :type="viewMode==='table'?'primary':''" size="small" @click="viewMode='table'"><i class="fa-solid fa-list"></i></el-button></div>
+                </div>
+                <div class="asset-list" v-if="viewMode==='card'">
+                  <div v-for="asset in filteredAssets" :key="asset.id" class="asset-card" :class="{active:selectedAsset&&selectedAsset.id===asset.id}" @click="selectAsset(asset)"><div class="asset-type-icon" :style="{background:asset.typeColor}"><i :class="asset.typeIcon" style="color:#fff"></i></div><div class="asset-info"><div class="asset-name">{{ asset.name }}</div><div class="asset-meta"><span><i class="fa-solid fa-barcode"></i> {{ asset.isbn||asset.code }}</span><span><i class="fa-regular fa-clock"></i> {{ asset.updatedAt }}</span></div><div class="asset-tags"><span :class="'status-tag status-'+asset.statusKey">{{ asset.statusLabel }}</span><span :class="'maturity-badge maturity-'+asset.maturityLevel">成熟度：{{ asset.maturityLevel }}</span><el-tag v-for="tag in asset.tags" :key="tag" size="small" type="info" effect="plain" round>{{ tag }}</el-tag></div></div></div>
+                </div>
+                <div class="asset-list" v-else style="padding:0">
+                  <el-table :data="filteredAssets" stripe highlight-current-row @row-click="selectAsset" style="width:100%" size="small">
+                    <el-table-column prop="name" label="资源名称" min-width="180"><template #default="{row}"><div style="font-weight:600;color:#303133">{{ row.name }}</div></template></el-table-column>
+                    <el-table-column prop="type" label="类型" width="80"/><el-table-column prop="isbn" label="ISBN/编号" width="140"/>
+                    <el-table-column label="加工状态" width="90"><template #default="{row}"><span :class="'status-tag status-'+row.statusKey">{{ row.statusLabel }}</span></template></el-table-column>
+                    <el-table-column label="成熟度" width="80"><template #default="{row}"><span :class="'maturity-badge maturity-'+row.maturityLevel">{{ row.maturityLevel }}</span></template></el-table-column>
+                    <el-table-column prop="updatedAt" label="更新时间" width="110"/>
+                  </el-table>
+                </div>
+              </div>
+              <div class="catalog-right" :class="{open:selectedAsset}">
+                <div class="detail-panel" v-if="selectedAsset">
+                  <div class="detail-header"><div class="detail-title">{{ selectedAsset.name }}</div><el-button text @click="selectedAsset=null"><i class="fa-solid fa-xmark"></i></el-button></div>
+                  <el-tabs v-model="detailTab" type="border-card" style="font-size:12px">
+                    <el-tab-pane label="出版元数据" name="meta"><div class="detail-tab-content">
+                      <div class="detail-field"><span class="field-label">书名</span><span class="field-value">{{ selectedAsset.name }}</span></div>
+                      <div class="detail-field"><span class="field-label">ISBN</span><span class="field-value">{{ selectedAsset.isbn||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">CIP</span><span class="field-value">{{ selectedAsset.cip||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">作者/主编</span><span class="field-value">{{ selectedAsset.author||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">责任编辑</span><span class="field-value">{{ selectedAsset.editor||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">出版时间</span><span class="field-value">{{ selectedAsset.pubDate||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">中图分类号</span><span class="field-value">{{ selectedAsset.clc||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">所属专题</span><span class="field-value">{{ selectedAsset.topic }}</span></div>
+                      <div class="detail-field"><span class="field-label">关键词</span><span class="field-value">{{ (selectedAsset.tags||[]).join('、') }}</span></div>
+                      <div class="detail-field"><span class="field-label">摘要</span><span class="field-value">{{ selectedAsset.abstract_||'-' }}</span></div>
+                    </div></el-tab-pane>
+                    <el-tab-pane label="版权授权" name="copyright"><div class="detail-tab-content">
+                      <div class="detail-field"><span class="field-label">版权归属</span><span class="field-value">{{ selectedAsset.copyrightOwner||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">合同编号</span><span class="field-value">{{ selectedAsset.contractNo||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">授权期限</span><span class="field-value">{{ selectedAsset.authPeriod||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">可AI问答</span><span class="field-value"><el-tag size="small" :type="selectedAsset.aiQA?'success':'danger'">{{ selectedAsset.aiQA?'允许':'禁止' }}</el-tag></span></div>
+                      <div class="detail-field"><span class="field-label">可模型训练</span><span class="field-value"><el-tag size="small" :type="selectedAsset.training?'success':'danger'">{{ selectedAsset.training?'允许':'禁止' }}</el-tag></span></div>
+                      <div class="detail-field"><span class="field-label">可对外交付</span><span class="field-value"><el-tag size="small" :type="selectedAsset.delivery?'success':'danger'">{{ selectedAsset.delivery?'允许':'禁止' }}</el-tag></span></div>
+                      <div class="detail-field"><span class="field-label">授权风险</span><span class="field-value"><el-tag size="small" :type="selectedAsset.authRisk==='低'?'success':selectedAsset.authRisk==='中'?'warning':'danger'">{{ selectedAsset.authRisk||'低' }}</el-tag></span></div>
+                    </div></el-tab-pane>
+                    <el-tab-pane label="结构化状态" name="struct"><div class="detail-tab-content">
+                      <div class="detail-field"><span class="field-label">章节数</span><span class="field-value">{{ selectedAsset.chapters||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">段落数</span><span class="field-value">{{ selectedAsset.paragraphs||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">知识片段</span><span class="field-value">{{ selectedAsset.fragments||'-' }}</span></div>
+                      <div class="detail-field"><span class="field-label">ES索引</span><span class="field-value"><el-tag size="small" :type="selectedAsset.esIndexed?'success':'info'">{{ selectedAsset.esIndexed?'已索引':'未建立' }}</el-tag></span></div>
+                      <div class="detail-field"><span class="field-label">成果版本</span><span class="field-value">{{ selectedAsset.version||'-' }}</span></div>
+                    </div></el-tab-pane>
+                    <el-tab-pane label="调用与审计" name="audit"><div class="detail-tab-content">
+                      <div class="detail-field"><span class="field-label">检索次数</span><span class="field-value">{{ selectedAsset.searchCount||0 }}</span></div>
+                      <div class="detail-field"><span class="field-label">RAG调用</span><span class="field-value">{{ selectedAsset.ragCount||0 }}</span></div>
+                      <div class="detail-field"><span class="field-label">API调用</span><span class="field-value">{{ selectedAsset.apiCount||0 }}</span></div>
+                    </div></el-tab-pane>
+                  </el-tabs>
+                  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                    <el-button type="primary" size="small" @click="onPushToPlatform"><i class="fa-solid fa-paper-plane"></i> 推送至加工平台</el-button>
+                    <el-button size="small" @click="openStructResultFromAsset"><i class="fa-solid fa-eye"></i> 结构化成果</el-button>
+                    <el-button size="small" @click="openEditMetaDialog"><i class="fa-solid fa-pen"></i> 编辑元数据</el-button>
+                    <el-button size="small" @click="openEditAuthDialog(selectedAsset)"><i class="fa-solid fa-key"></i> 管理授权</el-button>
+                    <el-button size="small" @click="onDownloadOriginal"><i class="fa-solid fa-download"></i> 下载原件</el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asset Enrollment -->
+          <div v-if="currentPage==='asset-enrollment'">
+            <div class="page-title"><i class="fa-solid fa-clipboard-list text-primary"></i> 资产编目</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>在线编制资产目录，登记出版元数据与版权状态，支持批量导入与审批发布。</span></div>
+            <el-card>
+              <div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-button type="primary" size="small" @click="showToast('新增编目草稿已创建','info')"><i class="fa-solid fa-plus"></i> 新增编目</el-button><el-button size="small" @click="showToast('已下载导入模板','success')"><i class="fa-solid fa-download"></i> 导出模板</el-button></div><el-input size="small" placeholder="搜索编目..." style="width:200px" clearable/></div>
+              <el-alert v-if="enrollmentIssues.length" type="warning" :closable="false" style="margin-bottom:12px"><template #title><b>编目问题提示</b></template><div v-for="issue in enrollmentIssues" :key="issue" style="font-size:12px;color:#E6A23C"><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px"></i>{{ issue }}</div></el-alert>
+              <el-table :data="enrollmentData" stripe size="small">
+                <el-table-column type="selection" width="40"/><el-table-column prop="code" label="资产编码" width="120"/><el-table-column prop="name" label="书名/资源名" min-width="140"/><el-table-column prop="isbn" label="ISBN" width="130"/><el-table-column prop="author" label="作者/主编" width="100"/><el-table-column prop="clc" label="分类号" width="80"/>
+                <el-table-column prop="copyrightStatus" label="版权状态" width="80"><template #default="{row}"><el-tag size="small" :type="row.copyrightStatus==='已确认'?'success':'danger'">{{ row.copyrightStatus }}</el-tag></template></el-table-column>
+                <el-table-column prop="completeness" label="编目完整率" width="100"><template #default="{row}"><el-progress :percentage="row.completeness" :stroke-width="6" :color="row.completeness>=80?'#67C23A':'#E6A23C'"/></template></el-table-column>
+                <el-table-column label="操作" width="120" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="showToast('已打开编目编辑：'+row.name,'info')">编辑</el-button><el-button link type="primary" size="small" @click="submitEnrollment(row)">提交审批</el-button></template></el-table-column>
+              </el-table>
+            </el-card>
+          </div>
+
+          <!-- Classification -->
+          <div v-if="currentPage==='asset-standards'">
+            <div class="page-title"><i class="fa-solid fa-layer-group text-primary"></i> 分级分类管理</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>多维多级分类定义与多层级安全定级，数据成熟度与安全分级为两套独立体系。</span></div>
+            <el-row :gutter="16">
+              <el-col :span="12"><el-card><template #header><span style="font-weight:600">分类体系</span></template><el-tree :data="classificationTree" :props="{label:'name',children:'children'}" default-expand-all><template #default="{node,data}"><span style="display:flex;align-items:center;gap:6px;font-size:13px"><i :class="data.icon" :style="{color:data.color||'#409EFF'}"></i>{{ data.name }}<el-tag v-if="data.count" size="small" type="info" round>{{ data.count }}</el-tag></span></template></el-tree></el-card></el-col>
+              <el-col :span="12"><el-card><template #header><span style="font-weight:600">安全分级</span></template><div v-for="level in securityLevels" :key="level.name" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0"><div :style="{width:'40px',height:'40px',borderRadius:'10px',background:level.color,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:'13px'}">{{ level.short }}</div><div style="flex:1"><div style="font-weight:600;font-size:14px;color:#303133">{{ level.name }}</div><div style="font-size:12px;color:#909399;margin-top:2px">{{ level.desc }}</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:#303133">{{ level.count }}</div><div style="font-size:11px;color:#909399">资源数</div></div></div></el-card><el-card style="margin-top:16px"><template #header><span style="font-weight:600">数据成熟度（L0-L4）</span></template><div v-for="m in maturityLevels" :key="m.level" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5"><div :style="{width:'36px',height:'36px',borderRadius:'8px',background:m.color,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:'13px'}">{{ m.level }}</div><div style="font-weight:500;font-size:13px;color:#303133">{{ m.name }}</div></div></el-card></el-col>
+            </el-row>
+          </div>
+
+          <!-- Tags -->
+          <div v-if="currentPage==='asset-tags'"><div class="page-title"><i class="fa-solid fa-tags text-primary"></i> 标签体系</div><el-card><div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-button type="primary" size="small" @click="showToast('已新建标签','success')"><i class="fa-solid fa-plus"></i> 新建标签</el-button></div></div><div v-for="cat in tagCategories" :key="cat.name" style="margin-bottom:20px"><div style="font-size:14px;font-weight:600;color:#303133;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i :class="cat.icon" :style="{color:cat.color}"></i> {{ cat.name }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><el-tag v-for="tag in cat.tags" :key="tag" effect="plain" round size="large" style="cursor:pointer">{{ tag }}</el-tag></div></div></el-card></div>
+
+          <!-- Resource Upload (MOD-10) -->
+          <div v-if="currentPage==='resource-upload'">
+            <div class="page-title"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> 资源接入</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>多格式资源上传、出版元数据登记、版权状态标识与接入完整性校验，确保每项资源可识别、可确权、可追溯。</span></div>
+            <el-row :gutter="16">
+              <el-col :span="16"><el-card class="mb-16"><template #header><span style="font-weight:600">接入流程</span></template>
+                <el-steps :active="uploadStep" finish-status="success" simple style="margin-bottom:16px"><el-step title="文件上传"/><el-step title="格式校验"/><el-step title="MD5去重"/><el-step title="元数据登记"/><el-step title="版权标识"/><el-step title="原始归档"/><el-step title="结构化解析"/><el-step title="成果入库"/><el-step title="建立索引"/></el-steps>
+                <div class="upload-zone" @click="startUpload"><i class="fa-solid fa-cloud-arrow-up"></i><div class="upload-text">拖拽文件到此处，或 <span class="text-primary" style="cursor:pointer">点击上传</span></div><div class="upload-hint">支持 PDF / Word / EPUB / 图片 / 音视频 / ZIP批量包，单文件最大 2GB</div></div>
+                <el-alert v-if="uploadStatus" :type="uploadStatusType" :closable="false" style="margin-top:12px" :title="uploadStatus"></el-alert>
+                <el-divider>最近上传（联动原始资源库与审计日志）</el-divider>
+                <el-table :data="store.rawResources" stripe size="small">
+                  <el-table-column prop="name" label="文件名" min-width="180"/><el-table-column prop="format" label="格式" width="60"/><el-table-column prop="size" label="大小" width="70"/>
+                  <el-table-column label="校验" width="90"><template #default="{row}"><span :class="'status-tag status-'+row.checkStatus">{{ row.checkLabel }}</span></template></el-table-column>
+                  <el-table-column prop="uploadedAt" label="上传时间" width="130"/>
+                </el-table>
+              </el-card></el-col>
+              <el-col :span="8">
+                <el-card class="mb-16"><template #header><span style="font-weight:600">接入完整性检查</span></template><div v-for="check in uploadChecks" :key="check.name" style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:12px"><i :class="check.pass?'fa-solid fa-circle-check text-success':'fa-solid fa-circle-xmark text-danger'" style="font-size:14px"></i><span style="flex:1;color:#606266">{{ check.name }}</span><el-tag size="small" :type="check.pass?'success':'danger'">{{ check.pass?'通过':'未通过' }}</el-tag></div></el-card>
+                <el-card class="mb-16"><template #header><span style="font-weight:600">接入统计</span></template><div style="text-align:center"><div style="font-size:36px;font-weight:900;color:#409EFF">{{ (1247+store.rawResources.length-3).toLocaleString() }}</div><div style="font-size:13px;color:#909399;margin-top:4px">累计接入资源</div></div><el-divider/><div style="display:flex;flex-direction:column;gap:8px;font-size:13px"><div class="flex-between"><span style="color:#909399">今日新增</span><span style="font-weight:600">{{ 23+store.rawResources.length-3 }}</span></div><div class="flex-between"><span style="color:#909399">校验通过</span><span style="font-weight:600;color:#67C23A">21</span></div></div></el-card>
+                <el-card><template #header><span style="font-weight:600">业务系统对接</span></template><div v-for="sys in businessSystems" :key="sys.name" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5"><i :class="sys.icon" :style="{color:sys.color,fontSize:'18px'}"></i><div style="flex:1"><div style="font-size:13px;font-weight:500">{{ sys.name }}</div><div style="font-size:11px;color:#909399">{{ sys.mode }}</div></div><el-tag size="small" :type="sys.active?'success':'info'">{{ sys.active?'已连接':'待配置' }}</el-tag></div></el-card>
+              </el-col>
+            </el-row>
+          </div>
+
+          <!-- Original Library (MOD-11) -->
+          <div v-if="currentPage==='resource-original'">
+            <div class="page-title"><i class="fa-solid fa-box-archive text-primary"></i> 原始资源库</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>对象存储归档，确保原貌完整可追溯。可对失败/历史资源手动补发结构化解析（接入时按规则自动发起，此处为补发入口）。</span></div>
+            <el-card>
+              <div class="flex-between mb-16"><div style="display:flex;gap:8px;align-items:center"><el-input size="small" placeholder="搜索文件..." style="width:180px" clearable/></div><div style="display:flex;gap:8px"><el-button type="warning" size="small" @click="openParseDialog"><i class="fa-solid fa-gears"></i> 发起结构化解析</el-button><el-button type="primary" size="small" @click="startUpload"><i class="fa-solid fa-cloud-arrow-up"></i> 上传资源</el-button></div></div>
+              <el-table :data="store.rawResources" stripe size="small">
+                <el-table-column type="selection" width="40"/><el-table-column prop="name" label="文件名" min-width="200"/><el-table-column prop="format" label="格式" width="60"/><el-table-column prop="size" label="大小" width="70"/><el-table-column prop="md5" label="MD5指纹" width="150"/><el-table-column prop="source" label="来源" width="90"/><el-table-column prop="uploadedAt" label="归档时间" width="110"/>
+                <el-table-column label="操作" width="140" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="onDownloadOriginalFile(row)">下载</el-button><el-button link type="primary" size="small" @click="openParseDialogFor(row)">补发解析</el-button></template></el-table-column>
+              </el-table>
+            </el-card>
+          </div>
+
+          <!-- Struct Results Library (MOD-05/20) -->
+          <div v-if="currentPage==='resource-struct'">
+            <div class="page-title"><i class="fa-solid fa-table-cells text-primary"></i> 结构化成果库</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>结构化结果存储，支持一键回溯原始PDF页码，每条成果附完整来源映射。</span></div>
+            <div v-if="structFilterTip" class="top-tip-bar"><i class="fa-solid fa-filter"></i> {{ structFilterTip }} <el-button text size="small" @click="clearStructFilter" style="margin-left:auto">清除筛选</el-button></div>
+            <el-card>
+              <div class="flex-between mb-16"><div style="display:flex;gap:8px;align-items:center"><el-input v-model="structLibSearch" size="small" placeholder="搜索成果..." style="width:180px" clearable/><el-select v-model="structLibMaturity" size="small" placeholder="成熟度" clearable style="width:110px"><el-option v-for="q in maturityOptions" :key="q.val" :label="q.label" :value="q.val"/></el-select></div><span style="font-size:12px;color:#909399">共 {{ store.resultsLibraryTotal.toLocaleString() }} 条成果记录<el-tooltip content="成果=章节/段落级；总览页知识片段52,384为更细粒度chunk，口径不同"><span class="caliber-note" style="margin-left:6px"><i class="fa-solid fa-circle-info"></i>口径说明</span></el-tooltip></span></div>
+              <el-table :data="filteredStructLib" stripe size="small">
+                <el-table-column prop="id" label="成果编号" width="110"/><el-table-column prop="bookName" label="所属图书" min-width="140"/><el-table-column prop="chapter" label="章节路径" min-width="160"/><el-table-column prop="type" label="内容类型" width="80"/><el-table-column prop="pageRange" label="页码范围" width="80"/>
+                <el-table-column label="成熟度" width="60"><template #default="{row}"><span :class="'maturity-badge maturity-'+row.maturityLevel">{{ row.maturityLevel }}</span></template></el-table-column><el-table-column prop="batch" label="批次" width="80"/>
+                <el-table-column label="操作" width="120" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="viewStructResult(row)">查看</el-button><el-button link type="primary" size="small" @click="locateOriginalPage(row)">跳转原文</el-button></template></el-table-column>
+              </el-table>
+            </el-card>
+          </div>
+
+          <!-- Parse Engine (MOD-12) -->
+          <div v-if="currentPage==='struct-parse'">
+            <div class="page-title"><i class="fa-solid fa-gears text-primary"></i> 解析引擎</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>将PDF/Word/EPUB等出版内容自动拆解为章节、段落、图表、公式等结构化对象，为检索与RAG提供基础。</span></div>
+            <el-row :gutter="16">
+              <el-col :span="16"><el-card class="mb-16"><template #header><span style="font-weight:600">解析任务队列（联动 store.parseTasks）</span></template>
+                <el-table :data="store.parseTasks" stripe size="small">
+                  <el-table-column prop="bookName" label="图书名称" min-width="140"/><el-table-column prop="pages" label="页数" width="55"/><el-table-column prop="engine" label="解析引擎" width="110"/>
+                  <el-table-column prop="ocrAccuracy" label="OCR准确率" width="90"><template #default="{row}"><span style="color:#67C23A">{{ row.ocrAccuracy }}</span></template></el-table-column>
+                  <el-table-column prop="lowConfPages" label="低置信页" width="70"/>
+                  <el-table-column label="进度" width="120"><template #default="{row}"><el-progress :percentage="row.progress" :status="row.progress===100?'success':''" :stroke-width="6"/></template></el-table-column>
+                  <el-table-column label="操作" width="180" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="openParseReport(row)">解析报告</el-button><el-button link type="primary" size="small" @click="retryParse(row)">重新解析</el-button><el-button link type="primary" size="small" @click="currentPage='struct-calibrate'">进入校准</el-button></template></el-table-column>
+                </el-table>
+              </el-card></el-col>
+              <el-col :span="8"><el-card class="mb-16"><template #header><span style="font-weight:600">解析能力</span></template><div v-for="engine in parseEngines" :key="engine.name" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5"><i :class="engine.icon" :style="{color:engine.color,fontSize:'20px'}"></i><div style="flex:1"><div style="font-size:13px;font-weight:500">{{ engine.name }}</div><div style="font-size:11px;color:#909399">{{ engine.desc }}</div></div><el-tag size="small" type="success">可用</el-tag></div></el-card><el-card><template #header><span style="font-weight:600">联动说明</span></template><div style="font-size:12px;color:#606266;line-height:1.8"><div><i class="fa-solid fa-circle-check text-success" style="font-size:8px;margin-right:6px"></i>发起解析→任务列表新增</div><div><i class="fa-solid fa-circle-check text-success" style="font-size:8px;margin-right:6px"></i>解析完成→成熟度提升</div><div><i class="fa-solid fa-circle-check text-success" style="font-size:8px;margin-right:6px"></i>审核通过→成果库新增版本</div></div></el-card></el-col>
+            </el-row>
+          </div>
+
+          <!-- Calibration (MOD-08/13) -->
+          <div v-if="currentPage==='struct-calibrate'">
+            <div class="calibration-layout">
+              <div class="calibration-header">
+                <div style="display:flex;align-items:center;gap:12px"><i class="fa-solid fa-book-open" style="color:#409EFF;font-size:18px"></i><div><div style="font-size:14px;font-weight:600;color:#303133">大运河水利史 · 第三章 运河管理制度</div><div style="font-size:12px;color:#909399">ISBN: 978-7-5343-XXXX-X · 当前第 3/8 章</div></div></div>
+                <div style="flex:1"></div><el-progress :percentage="38" :stroke-width="8" style="width:200px"/><span style="font-size:12px;color:#909399;margin-left:8px">38%</span>
+                <el-button-group><el-button size="small" type="warning" @click="showToast('已暂停校准','warning')"><i class="fa-solid fa-pause"></i> 暂停</el-button><el-button size="small" type="success" @click="submitCalibration"><i class="fa-solid fa-check"></i> 提交审核</el-button></el-button-group>
+                <el-button size="small" @click="calibHistoryVisible=true"><i class="fa-solid fa-clock-rotate-left"></i> 修改历史</el-button>
+              </div>
+              <div class="calibration-body">
+                <div class="calibration-pdf"><div style="padding:8px 12px;border-bottom:1px solid #ebeef5;display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:600">原文预览</span><div style="flex:1"></div><span style="color:#909399">第 42 页 / 共 256 页</span></div><div class="pdf-preview"><div class="pdf-page"><div class="pdf-title">第三章 运河管理制度</div><div class="pdf-heading2">第一节 漕运管理机构的演变</div><div class="pdf-para">漕运管理制度是中国古代水利管理的重要组成部分。自隋唐大运河开通以来，历代王朝均设立了专门的漕运管理机构，以确保<span class="pdf-highlight">粮食物资的顺利运输</span>和运河水道的维护管理。</div><div class="pdf-para">隋代设立都水监，负责全国运河及水利事务的管理。唐代在都水监基础上增设水部郎中，专门掌管运河疏浚、水闸管理和漕运调度。</div><div class="pdf-heading2">第二节 明清时期的运河管理体系</div><div class="pdf-para">明清两代是中国运河管理体系最为成熟的时期。明代设总河都御史，统管南北运河事务。</div></div></div></div>
+                <div class="calibration-struct"><div style="padding:8px 12px;border-bottom:1px solid #ebeef5;font-size:12px;font-weight:600">结构化结果</div><div class="struct-chapters"><div v-for="ch in calibrationChapters" :key="ch.id" class="struct-chapter-item" :class="{active:ch.active}" @click="ch.active=!ch.active;calibrationChapters.forEach(c=>{if(c.id!==ch.id)c.active=false})"><i :class="ch.active?'fa-solid fa-folder-open':'fa-solid fa-folder'" style="margin-right:6px;color:#409EFF"></i>{{ ch.name }}</div></div><div class="struct-list"><div v-for="item in structItems" :key="item.id" class="struct-item"><div class="struct-header"><el-tag :type="item.typeTag" size="small" effect="dark">{{ item.typeLabel }}</el-tag><span v-if="item.confidence<70" style="font-size:11px;color:#E6A23C"><i class="fa-solid fa-triangle-exclamation"></i> {{ item.confidence }}%</span><span v-else-if="item.confidence<90" style="font-size:11px;color:#E6A23C">{{ item.confidence }}%</span><span v-else style="font-size:11px;color:#67C23A">{{ item.confidence }}%</span><span style="margin-left:auto;font-size:11px;color:#909399">第{{ item.page }}页</span></div><div class="struct-text">{{ item.text }}</div><div class="struct-actions"><el-button link type="primary" size="small" @click="openEditParagraph(item)"><i class="fa-solid fa-pen"></i> 编辑</el-button><el-button link type="primary" size="small" @click="openSplitParagraph(item)"><i class="fa-solid fa-scissors"></i> 拆分</el-button><el-button link type="primary" size="small" @click="toggleMergeMode(item)"><i class="fa-solid fa-compress"></i> {{ mergeSelected.includes(item.id)?'取消':'合并' }}</el-button></div></div><el-button v-if="mergeSelected.length>=2" size="small" type="primary" style="width:100%;margin-top:8px" @click="doMerge"><i class="fa-solid fa-compress"></i> 合并选中的 {{ mergeSelected.length }} 段</el-button><el-button size="small" type="primary" plain style="width:100%;margin-top:8px" @click="showToast('已新增空段落','info')"><i class="fa-solid fa-plus"></i> 添加新段落</el-button></div></div>
+              </div>
+              <div class="calibration-footer"><div style="display:flex;align-items:center;gap:16px"><span style="font-size:12px;color:#909399">已校准: <b style="color:#67C23A">24</b> 段</span><span style="font-size:12px;color:#909399">待校准: <b style="color:#E6A23C">12</b> 段</span></div><div style="display:flex;gap:8px"><el-button size="small" @click="showToast('已切换上一章','info')"><i class="fa-solid fa-chevron-left"></i> 上一章</el-button><el-button size="small" type="success" @click="showToast('本章已标记完成','success')"><i class="fa-solid fa-check-double"></i> 标记完成</el-button><el-button size="small" @click="showToast('已切换下一章','info')">下一章 <i class="fa-solid fa-chevron-right"></i></el-button></div></div>
+            </div>
+          </div>
+
+          <!-- Struct Audit (MOD-08) -->
+          <div v-if="currentPage==='struct-audit'">
+            <div class="page-title"><i class="fa-solid fa-clipboard-check text-primary"></i> 结构化审核</div>
+            <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>校准完成后提交至此审核队列。审核通过将生成新版本结构化成果，并同步全文索引、向量索引与来源追溯关系。</span></div>
+            <el-card><template #header><div class="flex-between"><span style="font-weight:600">待审列表</span><span style="font-size:12px;color:#909399">共 {{ store.auditQueue.length }} 项待审</span></div></template>
+              <div v-if="store.auditQueue.length===0" style="text-align:center;padding:40px;color:#909399"><i class="fa-solid fa-inbox" style="font-size:40px;display:block;margin-bottom:12px"></i>暂无待审项</div>
+              <div v-for="item in store.auditQueue" :key="item.id" style="border:1px solid #ebeef5;border-radius:10px;padding:14px 16px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:12px"><i class="fa-solid fa-book-open" style="color:#E6A23C;font-size:18px"></i><div style="flex:1"><div style="font-size:14px;font-weight:600;color:#303133">{{ item.bookName }} · {{ item.chapter }}</div><div style="font-size:12px;color:#909399;margin-top:2px">提交人：{{ item.submitter }} · 提交时间：{{ item.submitTime }} · 校准段落数：{{ item.paragraphs }}</div></div><el-button type="success" size="small" @click="approveStructAudit(item)"><i class="fa-solid fa-check"></i> 通过</el-button><el-button type="danger" size="small" @click="rejectStructAudit(item)"><i class="fa-solid fa-xmark"></i> 驳回</el-button></div></div>
+            </el-card>
+          </div>
+
+          <!-- Struct Results -->
+          <div v-if="currentPage==='struct-results'">
+            <div class="page-title"><i class="fa-solid fa-diagram-project text-primary"></i> 结构化成果</div>
+            <el-card><div class="flex-between mb-16"><el-input v-model="structResultSearch" size="small" placeholder="搜索图书..." style="width:180px" clearable/><span style="font-size:12px;color:#909399">共 {{ store.overview.structuredBooks }} 本图书已结构化</span></div>
+              <el-table :data="filteredStructResults" stripe size="small">
+                <el-table-column type="selection" width="40"/><el-table-column prop="bookName" label="图书名称" min-width="160"/><el-table-column prop="chapters" label="章节数" width="70"/><el-table-column prop="paragraphs" label="段落数" width="70"/><el-table-column prop="fragments" label="知识片段" width="80"/>
+                <el-table-column label="成熟度" width="70"><template #default="{row}"><span :class="'maturity-badge maturity-'+row.maturityLevel">{{ row.maturityLevel }}</span></template></el-table-column><el-table-column prop="version" label="版本" width="70"/><el-table-column prop="calibrator" label="校准人" width="80"/><el-table-column prop="calibratedAt" label="校准时间" width="100"/>
+                <el-table-column label="操作" width="120" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="currentPage='struct-calibrate'">校准</el-button><el-button link type="primary" size="small" @click="showToast('查看 '+row.bookName+' 成果详情','info')">查看</el-button></template></el-table-column>
+              </el-table>
+            </el-card>
+          </div>
+
+          <!-- Search (MOD-03/14/19) -->
+          <div v-if="['search-fulltext','search-semantic','search-faceted','search-hybrid'].includes(currentPage)">
+            <div class="search-hero"><h2>统一知识检索</h2><p style="color:#909399;font-size:14px">全文 · 语义 · 分面 · 混合 — 全方位知识发现</p></div>
+            <div v-if="searchTip" class="top-tip-bar" style="max-width:900px;margin:0 auto 12px"><i class="fa-solid fa-circle-check"></i> {{ searchTip }}</div>
+            <div class="search-box"><el-input v-model="searchQuery" placeholder="输入检索词或自然语言描述..." size="large" clearable @keyup.enter="doSearch"><template #prefix><i class="fa-solid fa-magnifying-glass" style="color:#909399"></i></template><template #append><el-button type="primary" @click="doSearch">检索</el-button></template></el-input></div>
+            <div class="search-tabs"><div class="search-tab" :class="{active:currentPage==='search-fulltext'}" @click="currentPage='search-fulltext'">全文检索</div><div class="search-tab" :class="{active:currentPage==='search-semantic'}" @click="currentPage='search-semantic'">语义检索</div><div class="search-tab" :class="{active:currentPage==='search-faceted'}" @click="currentPage='search-faceted'">分面导航</div><div class="search-tab" :class="{active:currentPage==='search-hybrid'}" @click="currentPage='search-hybrid'">混合检索</div></div>
+            <div class="search-facets" v-if="currentPage==='search-faceted'"><el-tag v-for="f in facets" :key="f" effect="plain" round style="cursor:pointer" @click="searchQuery=f;doSearch()">{{ f }}</el-tag></div>
+            <div class="search-results" v-if="searchResults.length">
+              <div style="font-size:13px;color:#909399;margin-bottom:12px">找到 {{ searchResults.length }} 条相关结果</div>
+              <div v-for="(result,idx) in searchResults" :key="idx" class="search-result-card">
+                <div class="result-source"><i class="fa-solid fa-book"></i> {{ result.book }} · {{ result.chapter }} · 第{{ result.page }}页</div>
+                <div class="result-title">{{ result.title }}</div>
+                <div class="result-snippet" v-html="result.snippet"></div>
+                <div class="result-meta"><span><i class="fa-solid fa-tag"></i> {{ result.tags }}</span><span><i class="fa-solid fa-shield-halved"></i> {{ result.auth }}</span><span><i class="fa-solid fa-clock"></i> {{ result.year }}</span></div>
+                <div class="result-actions"><el-button size="small" @click="viewOriginalPage(result)"><i class="fa-solid fa-file-pdf"></i> 查看原文</el-button><el-button size="small" @click="generateCitation(result)"><i class="fa-solid fa-quote-right"></i> 生成引用</el-button><el-button size="small" type="primary" @click="addToRagContext(result)"><i class="fa-solid fa-robot"></i> 加入问答上下文</el-button></div>
+              </div>
+            </div>
+            <div v-else-if="searchQuery" style="text-align:center;padding:40px;color:#909399"><i class="fa-solid fa-magnifying-glass" style="font-size:48px;margin-bottom:16px;display:block"></i>输入关键词后点击检索</div>
+          </div>
+
+          <!-- RAG Chat (MOD-15) -->
+          <div v-if="currentPage==='ai-rag'">
+            <div class="rag-container">
+              <div class="rag-sidebar"><div style="font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-comments text-primary"></i> 对话列表</div><el-button type="primary" size="small" style="width:100%;margin-bottom:12px" @click="newChat"><i class="fa-solid fa-plus"></i> 新建对话</el-button><div v-for="chat in ragChats" :key="chat.id" style="padding:10px;border-radius:8px;cursor:pointer;margin-bottom:4px;transition:all .2s" :style="{background:activeChat===chat.id?'#ecf5ff':'transparent'}" @click="switchChat(chat.id)"><div style="font-size:13px;font-weight:500;color:#303133">{{ chat.title }}</div><div style="font-size:11px;color:#909399;margin-top:2px">{{ chat.time }}</div></div><el-divider/><div style="font-size:13px;font-weight:600;margin-bottom:8px">引用约束模式</div><el-switch v-model="citationMode" active-text="开启" inactive-text="关闭" @change="onCitationModeChange"/><div style="font-size:11px;color:#909399;margin-top:4px;line-height:1.5">开启后，模型仅基于检索上下文作答</div><div v-if="ragContext" style="margin-top:12px;padding:8px;background:#f0f7ff;border-radius:6px;font-size:11px;color:#409EFF"><i class="fa-solid fa-link"></i> 已加入上下文：{{ ragContext.book }} 第{{ ragContext.page }}页<el-button text size="small" @click="ragContext=null" style="margin-left:4px">移除</el-button></div></div>
+              <div class="rag-main"><div style="padding:12px 16px;border-bottom:1px solid #ebeef5;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-robot" style="color:#409EFF"></i><span style="font-weight:600;font-size:14px">RAG 知识问答</span><el-tag v-if="citationMode" size="small" type="success" effect="dark">引用约束模式</el-tag><span style="margin-left:auto;font-size:11px;color:#909399">今日调用 {{ store.ragCallCount.toLocaleString() }} 次</span></div>
+                <div class="chat-messages" ref="chatBox">
+                  <div v-for="(msg,idx) in currentChatMessages" :key="idx" class="chat-msg" :class="msg.role"><div class="msg-avatar" :style="{background:msg.role==='user'?'#409EFF':'#67C23A'}"><i :class="msg.role==='user'?'fa-solid fa-user':'fa-solid fa-robot'" style="color:#fff;font-size:14px"></i></div><div class="msg-bubble"><div v-html="msg.content"></div><div v-if="msg.citations"><div v-for="(cit,ci) in msg.citations" :key="ci" class="citation-card" @click="openCitationDetail(cit)"><i class="fa-solid fa-book-open" style="margin-right:4px"></i><span style="font-weight:600">{{ cit.book }}</span> · {{ cit.chapter }} · 第{{ cit.page }}页<div style="margin-top:4px;color:#606266;font-size:11px">{{ cit.excerpt }}</div></div></div><div v-if="msg.retrievalEvidence" style="margin-top:8px"><el-button size="small" type="primary" plain @click="toggleEvidence(idx)"><i class="fa-solid fa-microscope"></i> 查看检索依据</el-button><div v-if="evidenceVisible[idx]" class="retrieval-evidence"><div class="ev-title"><i class="fa-solid fa-microscope"></i> 检索依据详情</div><div class="ev-field"><span class="ev-label">用户问题</span><span>{{ msg.retrievalEvidence.query }}</span></div><div class="ev-field"><span class="ev-label">命中片段数</span><span>{{ msg.retrievalEvidence.hitCount }}</span></div><table class="ev-table"><tr><th>序号</th><th>相似度</th><th>来源图书</th><th>页码</th><th>授权</th><th>参与</th></tr><tr v-for="(rec,ri) in msg.retrievalEvidence.top5" :key="ri"><td>{{ ri+1 }}</td><td>{{ rec.similarity }}</td><td>{{ rec.book }}</td><td>{{ rec.page }}</td><td>{{ rec.auth }}</td><td>{{ rec.used?'✓':'—' }}</td></tr></table></div></div></div></div>
+                  <div v-if="ragProcessing" class="rag-process"><span class="dot"></span> {{ ragProcessText }}</div>
+                </div>
+                <div class="chat-input"><el-input v-model="chatInput" placeholder="输入您的问题..." @keyup.enter="sendChat" clearable/><el-button type="primary" @click="sendChat" :loading="ragProcessing"><i class="fa-solid fa-paper-plane"></i></el-button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Models (MOD-20) -->
+          <div v-if="currentPage==='ai-models'"><div class="page-title"><i class="fa-solid fa-server text-primary"></i> 模型网关</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>多模型统一接入网关，屏蔽接口差异，提供统一鉴权、限流、计费与敏感信息过滤。</span></div><el-row :gutter="16"><el-col :span="16"><el-card><template #header><span style="font-weight:600">已接入模型</span></template><el-table :data="aiModels" stripe size="small"><el-table-column prop="name" label="模型名称" min-width="160"/><el-table-column prop="provider" label="供应商" width="100"/><el-table-column prop="type" label="类型" width="120"/><el-table-column label="状态" width="70"><template #default="{row}"><el-tag size="small" :type="row.active?'success':'info'">{{ row.active?'在线':'离线' }}</el-tag></template></el-table-column><el-table-column prop="latency" label="平均延迟" width="80"/><el-table-column prop="calls" label="今日调用" width="80"/><el-table-column label="操作" width="80"><template #default><el-button link type="primary" size="small" @click="showToast('已打开模型配置','info')">配置</el-button></template></el-table-column></el-table></el-card></el-col><el-col :span="8"><el-card class="mb-16"><template #header><span style="font-weight:600">调用统计</span></template><div style="text-align:center;margin-bottom:12px"><div style="font-size:28px;font-weight:900;color:#409EFF">{{ store.overview.modelGatewayCalls.toLocaleString() }}</div><div style="font-size:12px;color:#909399">今日总调用次数</div></div><div class="caliber-note" style="justify-content:center"><i class="fa-solid fa-circle-info"></i> 含摘要/改写等全量AI调用，与总览"检索RAG今日8,921"口径不同</div><div style="display:flex;flex-direction:column;gap:8px;font-size:13px;margin-top:12px"><div class="flex-between"><span style="color:#909399">Token消耗</span><span style="font-weight:600">2.4M</span></div><div class="flex-between"><span style="color:#909399">限流拦截</span><span style="font-weight:600;color:#F56C6C">23</span></div></div></el-card><el-card><template #header><span style="font-weight:600">路由策略</span></template><div style="font-size:13px;color:#606266;line-height:1.8"><div><i class="fa-solid fa-circle text-success" style="font-size:8px;margin-right:6px"></i>通用问答→通用大模型</div><div><i class="fa-solid fa-circle text-warning" style="font-size:8px;margin-right:6px"></i>敏感书稿→私有化部署</div><div><i class="fa-solid fa-circle text-primary" style="font-size:8px;margin-right:6px"></i>RAG生成→领域专用模型</div></div></el-card></el-col></el-row></div>
+
+          <!-- Agent Workbench (MOD-19) -->
+          <div v-if="currentPage==='ai-agent'"><div class="page-title"><i class="fa-solid fa-robot text-primary"></i> Agent 解决方案工作台</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>基于知识中台的 Agent 解决方案编排与运行监控，支撑运营反馈中 Agent 调用数据的来源闭环。</span></div><el-row :gutter="16" class="mb-16"><el-col :span="6"><div class="stat-card" style="cursor:default"><div class="stat-icon" style="background:linear-gradient(135deg,#409EFF,#337ECC)"><i class="fa-solid fa-bolt"></i></div><div class="stat-value">{{ store.overview.agentCalls }}</div><div class="stat-label">今日 Agent 调用</div></div></el-col><el-col :span="6"><div class="stat-card" style="cursor:default"><div class="stat-icon" style="background:linear-gradient(135deg,#67C23A,#529B2E)"><i class="fa-solid fa-star"></i></div><div class="stat-value">4.2/5</div><div class="stat-label">平均用户评分</div></div></el-col><el-col :span="6"><div class="stat-card" style="cursor:default"><div class="stat-icon" style="background:linear-gradient(135deg,#E6A23C,#CF8E24)"><i class="fa-solid fa-circle-exclamation"></i></div><div class="stat-value">8.3%</div><div class="stat-label">未找到相关内容率</div></div></el-col><el-col :span="6"><div class="stat-card" style="cursor:default"><div class="stat-icon" style="background:linear-gradient(135deg,#F56C6C,#DD5A5A)"><i class="fa-solid fa-lightbulb"></i></div><div class="stat-value">12</div><div class="stat-label">高优改进建议</div></div></el-col></el-row><el-card><template #header><span style="font-weight:600">已编排 Agent</span></template><el-table :data="agentList" stripe size="small"><el-table-column prop="name" label="Agent 名称" min-width="160"/><el-table-column prop="scene" label="应用场景" width="140"/><el-table-column prop="model" label="调用模型" width="120"/><el-table-column label="状态" width="70"><template #default="{row}"><el-tag size="small" :type="row.active?'success':'info'">{{ row.active?'运行中':'已停用' }}</el-tag></template></el-table-column><el-table-column prop="calls" label="今日调用" width="80"/><el-table-column prop="satisfaction" label="评分" width="60"/><el-table-column label="操作" width="80"><template #default><el-button link type="primary" size="small" @click="showToast('已打开Agent配置','info')">配置</el-button></template></el-table-column></el-table></el-card></div>
+
+          <!-- Prompts -->
+          <div v-if="currentPage==='ai-prompts'"><div class="page-title"><i class="fa-solid fa-wand-magic-sparkles text-primary"></i> 提示词模板库</div><el-row :gutter="16"><el-col :span="8" v-for="prompt in promptTemplates" :key="prompt.id"><el-card style="margin-bottom:16px;cursor:pointer" shadow="hover" @click="showToast('已加载提示词：'+prompt.name,'info')"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i :class="prompt.icon" :style="{color:prompt.color,fontSize:'18px'}"></i><span style="font-weight:600;font-size:14px">{{ prompt.name }}</span></div><div style="font-size:12px;color:#909399;line-height:1.6">{{ prompt.desc }}</div><div style="margin-top:8px;display:flex;gap:4px"><el-tag size="small" v-for="tag in prompt.tags" :key="tag">{{ tag }}</el-tag></div></el-card></el-col></el-row></div>
+
+          <!-- Metadata -->
+          <div v-if="currentPage==='gov-metadata'"><div class="page-title"><i class="fa-solid fa-database text-primary"></i> 元数据管理</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>采集、管理与维护内容资源的出版元数据、结构元数据与业务元数据，支撑资产编目与血缘追溯。</span></div><el-card><div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-button type="primary" size="small" @click="showToast('已创建采集任务','success')"><i class="fa-solid fa-plus"></i> 采集任务</el-button></div><el-input size="small" placeholder="搜索元数据..." style="width:200px" clearable/></div><el-table :data="metadataData" stripe size="small"><el-table-column prop="name" label="元数据名称" min-width="160"/><el-table-column prop="source" label="数据源" width="100"/><el-table-column prop="fields" label="字段数" width="60"/><el-table-column prop="records" label="记录数" width="70"/><el-table-column label="质量评分" width="110"><template #default="{row}"><el-progress :percentage="row.quality" :color="row.quality>80?'#67C23A':row.quality>60?'#E6A23C':'#F56C6C'" :stroke-width="6"/></template></el-table-column><el-table-column prop="lastSync" label="最近同步" width="120"/><el-table-column label="操作" width="120"><template #default><el-button link type="primary" size="small" @click="showToast('查看详情','info')">查看</el-button><el-button link type="primary" size="small" @click="currentPage='gov-lineage'">血统</el-button></template></el-table-column></el-table></el-card></div>
+
+          <!-- Data Quality (MOD-17) -->
+          <div v-if="currentPage==='gov-quality'"><div class="page-title"><i class="fa-solid fa-chart-column text-primary"></i> 数据质量管理</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>6维度通用质量框架 + 出版业务专项规则，点击规则查看异常明细并支持一键跳转修复。</span></div><el-row :gutter="16" class="mb-16"><el-col :span="8" v-for="dim in qualityDimensions" :key="dim.name"><el-card shadow="hover"><div style="display:flex;align-items:center;gap:12px"><div :style="{width:'48px',height:'48px',borderRadius:'12px',background:dim.color,display:'flex',alignItems:'center',justifyContent:'center'}"><i :class="dim.icon" style="color:#fff;font-size:20px"></i></div><div><div style="font-size:20px;font-weight:900" :style="{color:dim.color}">{{ dim.score }}%</div><div style="font-size:13px;color:#606266;font-weight:500">{{ dim.name }}</div></div></div></el-card></el-col></el-row><el-card><template #header><span style="font-weight:600">质量检核规则（点击行查看异常明细）</span></template><el-table :data="qualityRules" stripe size="small" @row-click="openQualityExceptions"><el-table-column prop="name" label="规则名称" min-width="200"/><el-table-column prop="dimension" label="维度" width="70"/><el-table-column prop="target" label="目标实体" width="100"/><el-table-column label="通过率" width="110"><template #default="{row}"><el-progress :percentage="row.passRate" :stroke-width="6" :color="row.passRate>90?'#67C23A':row.passRate>70?'#E6A23C':'#F56C6C'"/></template></el-table-column><el-table-column prop="exceptions" label="异常数" width="70"/><el-table-column prop="lastRun" label="最近执行" width="110"/><el-table-column label="操作" width="100"><template #default="{row}"><el-button link type="primary" size="small" @click.stop="openQualityExceptions(row)">查看异常</el-button></template></el-table-column></el-table></el-card></div>
+
+          <!-- Lineage (MOD-18) -->
+          <div v-if="currentPage==='gov-lineage'"><div class="page-title"><i class="fa-solid fa-diagram-project text-primary"></i> 血缘分析 · 证据链</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>追踪任一检索结果或RAG回答能否追溯到原始图书页码，形成从原始文件到API调用的完整证据链。点击节点查看详情。</span></div><el-card class="mb-16"><div style="display:flex;gap:12px;align-items:center;margin-bottom:12px"><span style="font-size:13px;font-weight:600">选择资源追溯：</span><el-select v-model="lineageResource" placeholder="选择资源" style="width:240px" @change="onLineageResourceChange"><el-option v-for="a in lineageableAssets" :key="a.id" :label="a.name" :value="a.id"/></el-select><el-button size="small" @click="ragReverseLookup"><i class="fa-solid fa-rotate-left"></i> RAG 引用反查</el-button></div><div style="text-align:center;padding:20px"><div style="display:flex;align-items:flex-start;justify-content:center;gap:6px;flex-wrap:wrap"><div v-for="(node,idx) in lineageNodes" :key="idx" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer" @click="openLineageDetail(node)"><div :style="{background:node.color,color:'#fff',padding:'8px 14px',borderRadius:'8px',fontSize:'12px',fontWeight:600,minWidth:'90px',textAlign:'center',transition:'var(--transition)'}"><i :class="node.icon" style="margin-right:4px"></i>{{ node.name }}</div><div style="font-size:10px;color:#909399;max-width:100px;text-align:center">{{ node.detail }}</div><i v-if="idx<lineageNodes.length-1" class="fa-solid fa-arrow-right" style="color:#909399;font-size:16px;margin-top:8px"></i></div></div></div></el-card></div>
+
+          <!-- Copyright (MOD-16) -->
+          <div v-if="currentPage==='gov-copyright'"><div class="page-title"><i class="fa-solid fa-copyright text-primary"></i> 版权授权台账</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>控制内容资源使用范围，全流程核验。版权变更为禁用时，RAG/推送对该资源自动拦截。</span></div><el-row :gutter="12" class="mb-16"><el-col :span="6"><div class="risk-card" :class="{active:copyrightFilter==='confirmed'}" @click="setCopyrightFilter('confirmed')"><div class="rc-value text-success">{{ copyrightSummary.confirmed }}</div><div class="rc-label">已确权资源</div></div></el-col><el-col :span="6"><div class="risk-card" :class="{active:copyrightFilter==='pending'}" @click="setCopyrightFilter('pending')"><div class="rc-value text-warning">{{ copyrightSummary.pending }}</div><div class="rc-label">待确认资源</div></div></el-col><el-col :span="6"><div class="risk-card" :class="{active:copyrightFilter==='expiring'}" @click="setCopyrightFilter('expiring')"><div class="rc-value" style="color:#E6A23C">{{ copyrightSummary.expiring }}</div><div class="rc-label">30天内到期</div></div></el-col><el-col :span="6"><div class="risk-card" :class="{active:copyrightFilter==='high'}" @click="setCopyrightFilter('high')"><div class="rc-value text-danger">{{ copyrightSummary.high }}</div><div class="rc-label">高风险资源</div></div></el-col></el-row><el-card><div class="flex-between mb-16"><el-button type="primary" size="small" @click="showToast('已打开新增授权表单','info')"><i class="fa-solid fa-plus"></i> 新增授权记录</el-button><el-input size="small" placeholder="搜索..." style="width:200px" clearable v-model="copyrightSearch"/></div><el-table :data="filteredCopyrightData" stripe size="small"><el-table-column prop="resource" label="资源名称" min-width="160"/><el-table-column prop="owner" label="版权归属" width="80"/><el-table-column label="AI问答" width="70"><template #default="{row}"><el-tag size="small" :type="row.aiQA?'success':'danger'">{{ row.aiQA?'允许':'禁止' }}</el-tag></template></el-table-column><el-table-column label="模型训练" width="70"><template #default="{row}"><el-tag size="small" :type="row.training?'success':'danger'">{{ row.training?'允许':'禁止' }}</el-tag></template></el-table-column><el-table-column prop="period" label="授权期限" width="100"/><el-table-column prop="risk" label="风险" width="60"><template #default="{row}"><el-tag size="small" :type="row.risk==='低'?'success':row.risk==='中'?'warning':'danger'">{{ row.risk }}</el-tag></template></el-table-column><el-table-column label="操作" width="70"><template #default="{row}"><el-button link type="primary" size="small" @click="openEditAuthDialog(row)">编辑</el-button></template></el-table-column></el-table></el-card></div>
+
+          <!-- Permission -->
+          <div v-if="currentPage==='sec-permission'"><div class="page-title"><i class="fa-solid fa-user-shield text-primary"></i> 权限管理</div><el-row :gutter="16"><el-col :span="14"><el-card><template #header><span style="font-weight:600">角色与权限矩阵</span></template><el-table :data="permissionMatrix" stripe size="small" border><el-table-column prop="role" label="角色" width="130" fixed/><el-table-column prop="catalog" label="资产目录" width="70" align="center"><template #default="{row}"><i :class="row.catalog?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="upload" label="资源接入" width="70" align="center"><template #default="{row}"><i :class="row.upload?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="struct" label="结构化" width="70" align="center"><template #default="{row}"><i :class="row.struct?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="search" label="检索" width="60" align="center"><template #default="{row}"><i :class="row.search?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="ai" label="AI/RAG" width="70" align="center"><template #default="{row}"><i :class="row.ai?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="admin" label="系统管理" width="70" align="center"><template #default="{row}"><i :class="row.admin?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column></el-table></el-card></el-col><el-col :span="10"><el-card><template #header><span style="font-weight:600">五层权限粒度</span></template><div v-for="layer in permissionLayers" :key="layer.name" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5"><div :style="{width:'36px',height:'36px',borderRadius:'8px',background:layer.color,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:'13px'}">{{ layer.level }}</div><div><div style="font-weight:600;font-size:13px;color:#303133">{{ layer.name }}</div><div style="font-size:11px;color:#909399">{{ layer.desc }}</div></div></div></el-card></el-col></el-row></div>
+
+          <!-- Audit (MOD-23) -->
+          <div v-if="currentPage==='sec-audit'"><div class="page-title"><i class="fa-solid fa-scroll text-primary"></i> 审计日志</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>Append-Only审计链路，独立审计库，保留≥3年。联动 store.auditLogs，点击行展开详情，筛选实时生效。</span></div><el-row :gutter="16"><el-col :span="16"><el-card><div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-select v-model="auditFilterType" size="small" placeholder="操作类型" clearable style="width:110px"><el-option label="检索" value="检索"/><el-option label="下载" value="下载"/><el-option label="导出" value="导出"/><el-option label="管理" value="管理"/><el-option label="RAG" value="RAG"/><el-option label="API" value="API"/><el-option label="上传" value="上传"/><el-option label="结构化入库" value="结构化入库"/></el-select><el-input v-model="auditFilterUser" size="small" placeholder="操作人" clearable style="width:120px"/></div><el-button size="small" @click="showToast('审计日志已导出','success')"><i class="fa-solid fa-download"></i> 导出日志</el-button></div><el-table :data="filteredAuditLogs" stripe size="small" @row-click="toggleAuditDetail"><el-table-column type="expand"><template #default="{row}"><div style="padding:8px 16px;font-size:12px;color:#606266;background:#fafafa"><b>详情：</b>{{ row.detail }}<br><b>IP：</b>{{ row.ip }}<br><b>结果：</b><span :class="row.success?'text-success':'text-danger'">{{ row.success?'成功':'失败' }}</span></div></template></el-table-column><el-table-column prop="time" label="时间" width="140"/><el-table-column prop="user" label="操作人" width="110"/><el-table-column prop="action" label="类型" width="90"><template #default="{row}"><el-tag size="small" :type="row.actionType">{{ row.action }}</el-tag></template></el-table-column><el-table-column prop="target" label="对象" min-width="130"/><el-table-column prop="detail" label="详情" min-width="150" show-overflow-tooltip/></el-table></el-card></el-col><el-col :span="8"><el-card><template #header><span style="font-weight:600">近期审计摘要</span></template><div style="position:relative;padding-left:20px"><div style="position:absolute;left:6px;top:0;bottom:0;width:2px;background:#e8e8e8"></div><div v-for="item in auditTimeline" :key="item.time" style="position:relative;padding:10px 12px;margin-bottom:8px;background:#fff;border-radius:6px;border:1px solid #ebeef5"><div style="position:absolute;left:-18px;top:14px;width:8px;height:8px;border-radius:50%;border:2px solid #409EFF;background:#fff"></div><div style="font-size:11px;color:#909399">{{ item.time }}</div><div style="font-size:12px;color:#303133;margin-top:2px">{{ item.action }}</div></div></div></el-card></el-col></el-row></div>
+
+          <!-- Alerts -->
+          <div v-if="currentPage==='sec-alert'"><div class="page-title"><i class="fa-solid fa-triangle-exclamation text-warning"></i> 异常预警</div><el-card><el-table :data="alertData" stripe size="small"><el-table-column label="级别" width="60"><template #default="{row}"><el-tag size="small" :type="row.level==='高'?'danger':row.level==='中'?'warning':'info'">{{ row.level }}</el-tag></template></el-table-column><el-table-column prop="rule" label="触发规则" min-width="180"/><el-table-column prop="user" label="用户" width="90"/><el-table-column prop="detail" label="详情" min-width="180"/><el-table-column prop="time" label="时间" width="130"/><el-table-column label="状态" width="70"><template #default="{row}"><el-tag size="small" :type="row.handled?'success':'danger'">{{ row.handled?'已处理':'待处理' }}</el-tag></template></el-table-column><el-table-column label="操作" width="80"><template #default="{row}"><el-button link type="primary" size="small" @click="handleAlert(row)">{{ row.handled?'查看':'处理' }}</el-button></template></el-table-column></el-table></el-card></div>
+
+          <!-- API Gateway (MOD-21) -->
+          <div v-if="currentPage==='api-gateway'"><div class="page-title"><i class="fa-solid fa-plug text-primary"></i> 数据接口网关</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>将中台资源、检索、权限、RAG、数据产品等能力封装为标准化接口，按业务能力分组，统一出口。</span></div><el-card class="mb-16"><div style="display:flex;gap:24px;font-size:13px"><span>今日总调用：<b style="color:#409EFF">{{ store.apiCallsTodayTotal.toLocaleString() }}</b> 次</span><span style="color:#909399">点击"测试"返回模拟响应并联动调用计数与日志</span></div></el-card><el-card><template #header><div class="flex-between"><span style="font-weight:600">接口列表（按业务能力分组）</span><el-button type="primary" size="small" @click="showToast('已打开接口注册表单','info')"><i class="fa-solid fa-plus"></i> 注册接口</el-button></div></template><div v-for="group in apiGroups" :key="group.name" class="api-group"><div class="api-group-title"><i :class="group.icon" :style="{color:group.color}"></i> {{ group.name }}</div><el-table :data="group.apis" stripe size="small" style="margin-bottom:4px"><el-table-column prop="method" label="方法" width="60"><template #default="{row}"><el-tag size="small" :type="row.method==='GET'?'success':row.method==='POST'?'primary':'warning'" effect="dark">{{ row.method }}</el-tag></template></el-table-column><el-table-column prop="path" label="路径" min-width="200"/><el-table-column prop="desc" label="描述" min-width="180"/><el-table-column prop="auth" label="鉴权" width="80"/><el-table-column prop="callsToday" label="今日调用" width="80"/><el-table-column prop="latency" label="延迟" width="70"/><el-table-column prop="status" label="状态" width="60"><template #default="{row}"><el-tag size="small" :type="row.status==='正常'?'success':'danger'">{{ row.status }}</el-tag></template></el-table-column><el-table-column label="操作" width="120"><template #default="{row}"><el-button link type="primary" size="small" @click="showApiDoc(row)">文档</el-button><el-button link type="primary" size="small" @click="testApi(row)">测试</el-button></template></el-table-column></el-table></div></el-card></div>
+
+          <!-- Callback (MOD-22) -->
+          <div v-if="currentPage==='api-callback'"><div class="page-title"><i class="fa-solid fa-rotate text-primary"></i> 成果回流</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>接收加工平台回流的结构化与知识化成果，自动更新资产目录、成熟度与可用场景。点击卡片查看详情，失败项可重试。</span></div><el-card class="mb-16"><template #header><span style="font-weight:600">结构化回流</span></template><el-timeline><el-timeline-item v-for="cb in callbackStructured" :key="cb.id" :timestamp="cb.time" placement="top" :type="cb.type"><el-card shadow="hover" style="cursor:pointer" @click="openCallbackDetail(cb)"><div style="font-weight:600;font-size:14px;color:#303133">{{ cb.title }}</div><div style="font-size:12px;color:#909399;margin-top:4px">{{ cb.desc }}</div><div style="margin-top:8px;display:flex;gap:8px;align-items:center"><el-tag size="small">{{ cb.module }}</el-tag><el-tag size="small" :type="cb.status==='success'?'success':cb.status==='pending'?'warning':'danger'">{{ cb.statusLabel }}</el-tag><el-button v-if="cb.status==='failed'" link type="danger" size="small" @click.stop="retryCallback(cb)"><i class="fa-solid fa-rotate-right"></i> 重试</el-button></div></el-card></el-timeline-item></el-timeline></el-card><el-card><template #header><span style="font-weight:600">知识化回流</span></template><el-timeline><el-timeline-item v-for="cb in callbackKnowledge" :key="cb.id" :timestamp="cb.time" placement="top" :type="cb.type"><el-card shadow="hover" style="cursor:pointer" @click="openCallbackDetail(cb)"><div style="font-weight:600;font-size:14px;color:#303133">{{ cb.title }}</div><div style="font-size:12px;color:#909399;margin-top:4px">{{ cb.desc }}</div><div style="margin-top:8px;display:flex;gap:8px;align-items:center"><el-tag size="small">{{ cb.module }}</el-tag><el-tag size="small" :type="cb.status==='success'?'success':cb.status==='pending'?'warning':'danger'">{{ cb.statusLabel }}</el-tag><el-button v-if="cb.status==='failed'" link type="danger" size="small" @click.stop="retryCallback(cb)"><i class="fa-solid fa-rotate-right"></i> 重试</el-button></div></el-card></el-timeline-item></el-timeline></el-card></div>
+
+          <!-- API Feedback (MOD-01 fix) -->
+          <div v-if="currentPage==='api-feedback'"><div class="page-title"><i class="fa-solid fa-chart-line text-primary"></i> 运营反馈回流</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>RAG问答日志、用户评价、热点问题、API调用结果与Agent使用反馈的汇总与分析。</span></div><el-card class="mb-16"><template #header><span style="font-weight:600">RAG问答日志</span></template><el-table :data="feedbackRagLogs" stripe size="small"><el-table-column prop="time" label="时间" width="130"/><el-table-column prop="query" label="用户问题" min-width="180"/><el-table-column prop="model" label="模型" width="120"/><el-table-column prop="tokens" label="Token" width="70"/><el-table-column prop="satisfaction" label="用户评分" width="80"><template #default="{row}"><el-rate v-model="row.satisfaction" disabled size="small"/></template></el-table-column></el-table></el-card><el-card class="mb-16"><template #header><span style="font-weight:600">热点问题</span></template><div v-for="(hq,i) in feedbackHotQuestions" :key="i" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:13px"><span style="color:#909399;width:24px;text-align:center">{{ i+1 }}</span><span style="flex:1;color:#303133">{{ hq.query }}</span><span style="color:#409EFF;font-weight:600">{{ hq.count }}次</span></div></el-card><el-card><template #header><div class="flex-between"><span style="font-weight:600">Agent使用反馈</span><el-button link type="primary" size="small" @click="currentPage='ai-agent'">查看 Agent 工作台 →</el-button></div></template><div style="display:flex;flex-direction:column;gap:8px;font-size:12px"><div class="flex-between"><span style="color:#909399">今日Agent调用</span><span style="font-weight:600">{{ store.overview.agentCalls }}次</span></div><div class="flex-between"><span style="color:#909399">平均用户评分</span><span style="font-weight:600;color:#67C23A">4.2/5</span></div><div class="flex-between"><span style="color:#909399">未找到相关内容率</span><span style="font-weight:600;color:#E6A23C">8.3%</span></div><div class="flex-between"><span style="color:#909399">高优改进建议</span><span style="font-weight:600;color:#409EFF">12条</span></div></div></el-card></div>
+
+          <!-- Settings (MOD-07) -->
+          <div v-if="currentPage==='settings'"><div class="page-title"><i class="fa-solid fa-gear text-primary"></i> 系统设置</div><el-row :gutter="16"><el-col :span="12"><el-card class="mb-16"><template #header><span style="font-weight:600">基础配置</span></template><el-form label-width="100px" size="small"><el-form-item label="平台名称"><el-input value="知识数据中台"/></el-form-item><el-form-item label="当前版本"><el-input value="v1.0.0" disabled/></el-form-item><el-form-item label="组织模式"><el-radio-group v-model="orgMode"><el-radio-button label="single">单组织模式</el-radio-button><el-radio-button label="group">集团组织模式</el-radio-button><el-radio-button label="multi">多机构协同模式</el-radio-button></el-radio-group></el-form-item><el-form-item label="对象存储"><el-input value="凤凰云 OSS"/></el-form-item><el-form-item><el-button type="primary" @click="showToast('配置已保存','success')">保存配置</el-button></el-form-item></el-form></el-card></el-col><el-col :span="12"><el-card class="mb-16" v-if="orgMode!=='single'"><template #header><span style="font-weight:600">{{ orgMode==='group'?'集团/多机构概况':'多机构协同概况' }}（只读）</span></template><el-row :gutter="12"><el-col :span="8" v-for="org in orgOverview" :key="org.name"><div class="org-card"><div class="oc-name">{{ org.name }}</div><div class="oc-stat"><div><div class="oc-num">{{ org.resources }}</div><div class="oc-lbl">资源量</div></div><div><div class="oc-num">{{ org.calls }}</div><div class="oc-lbl">今日调用</div></div></div></div></el-col></el-row></el-card><el-card class="mb-16"><template #header><span style="font-weight:600">存储引擎状态</span></template><div v-for="engine in storageEngines" :key="engine.name" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5"><div :style="{width:'36px',height:'36px',borderRadius:'8px',background:engine.color,display:'flex',alignItems:'center',justifyContent:'center'}"><i :class="engine.icon" style="color:#fff;font-size:14px"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">{{ engine.name }}</div><div style="font-size:11px;color:#909399">{{ engine.version }}</div></div><el-tag size="small" :type="engine.active?'success':'danger'">{{ engine.active?'正常':'异常' }}</el-tag></div></el-card><el-card><template #header><span style="font-weight:600">组织与用户</span></template><div style="display:flex;gap:16px;text-align:center"><div style="flex:1;padding:16px;background:#f0f7ff;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#409EFF">5</div><div style="font-size:12px;color:#909399">部门</div></div><div style="flex:1;padding:16px;background:#f0f9eb;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#67C23A">28</div><div style="font-size:12px;color:#909399">用户</div></div><div style="flex:1;padding:16px;background:#fdf6ec;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#E6A23C">8</div><div style="font-size:12px;color:#909399">角色</div></div></div></el-card></el-col></el-row></div>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Dialogs: Push (MOD-02) -->
+    <el-dialog v-model="pushDialogVisible" title="推送至加工平台" width="520px"><div style="font-size:13px;line-height:1.8;color:#606266">当前资源将以标准化资产形式推送至高质量数据集加工平台。<br><br><b>知识数据中台</b>负责资源登记、版权状态、结构化成果、来源追溯和能力输出；<br><b>加工平台</b>负责深度标注、审核、质检和数据产品封装。<br><br>加工完成后成果将回流中台，并写入审计日志。</div><template #footer><el-button @click="pushDialogVisible=false">取消</el-button><el-button type="primary" @click="confirmPush">确认推送</el-button></template></el-dialog>
+    <!-- Edit metadata (MOD-05) -->
+    <el-dialog v-model="editMetaDialogVisible" title="编辑元数据" width="560px"><el-form :model="editMetaForm" label-width="100px" size="small"><el-form-item label="ISBN"><el-input v-model="editMetaForm.isbn"/></el-form-item><el-form-item label="CIP"><el-input v-model="editMetaForm.cip"/></el-form-item><el-form-item label="作者/主编"><el-input v-model="editMetaForm.author"/></el-form-item><el-form-item label="责任编辑"><el-input v-model="editMetaForm.editor"/></el-form-item><el-form-item label="出版时间"><el-input v-model="editMetaForm.pubDate"/></el-form-item><el-form-item label="中图分类号"><el-input v-model="editMetaForm.clc"/></el-form-item><el-form-item label="所属专题"><el-input v-model="editMetaForm.topic"/></el-form-item><el-form-item label="关键词"><el-input v-model="editMetaForm.tagsStr" placeholder="多个关键词用、分隔"/></el-form-item><el-form-item label="摘要"><el-input v-model="editMetaForm.abstract_" type="textarea" :rows="3"/></el-form-item></el-form><template #footer><el-button @click="editMetaDialogVisible=false">取消</el-button><el-button type="primary" @click="saveEditMeta">保存</el-button></template></el-dialog>
+    <!-- Edit auth (MOD-05/16) -->
+    <el-dialog v-model="editAuthDialogVisible" title="管理授权" width="600px"><div v-if="editAuthForm.resource" style="margin-bottom:12px;font-size:13px"><b>资源：</b>{{ editAuthForm.resource }}</div><el-form :model="editAuthForm" label-width="120px" size="small"><el-form-item label="合同编号"><el-input v-model="editAuthForm.contractNo"/></el-form-item><el-form-item label="授权文件"><el-input v-model="editAuthForm.authFile" placeholder="授权文件名/链接"/></el-form-item><el-form-item label="授权期限"><el-input v-model="editAuthForm.authPeriod"/></el-form-item><el-form-item label="数据库展示"><el-switch v-model="editAuthForm.dbDisplay"/></el-form-item><el-form-item label="AI问答"><el-switch v-model="editAuthForm.aiQA"/></el-form-item><el-form-item label="模型训练"><el-switch v-model="editAuthForm.training"/></el-form-item><el-form-item label="对外交付"><el-switch v-model="editAuthForm.delivery"/></el-form-item><el-form-item label="第三方素材"><el-select v-model="editAuthForm.thirdPartyStatus" style="width:100%"><el-option label="无第三方素材" value="无"/><el-option label="含第三方·已授权" value="已授权"/><el-option label="含第三方·待授权" value="待授权"/></el-select></el-form-item><el-form-item label="风险等级"><el-select v-model="editAuthForm.risk" style="width:100%"><el-option label="低" value="低"/><el-option label="中" value="中"/><el-option label="高" value="高"/></el-select></el-form-item></el-form><template #footer><el-button @click="editAuthDialogVisible=false">取消</el-button><el-button type="primary" @click="saveEditAuth">保存</el-button></template></el-dialog>
+    <!-- Submit audit (MOD-08) -->
+    <el-dialog v-model="submitAuditDialogVisible" title="提交审核" width="520px"><div style="font-size:13px;line-height:1.8;color:#606266"><el-alert type="info" :closable="false" style="margin-bottom:12px">校准完成后将提交至结构化审核队列；审核通过后系统生成新的结构化成果版本，并同步更新全文索引、向量索引与来源追溯关系。</el-alert>确认提交《大运河水利史 · 第三章》的校准结果至审核队列？</div><template #footer><el-button @click="submitAuditDialogVisible=false">取消</el-button><el-button type="primary" @click="confirmSubmitAudit">确认提交</el-button></template></el-dialog>
+    <!-- Upload sim (MOD-10) -->
+    <el-dialog v-model="uploadDialogVisible" title="模拟文件上传" width="480px"><div style="font-size:13px;color:#606266;line-height:1.8"><p>演示模拟上传流程（联动原始资源库与审计日志）：</p><ol style="padding-left:20px;margin:8px 0"><li>新增上传文件记录</li><li>格式校验中…</li><li>2 秒后校验通过</li><li>元数据缺失则提示补全 ISBN/CIP</li><li>确认版权状态</li><li>确认入库→原始资源库新增记录</li><li>审计日志新增上传记录</li></ol><p style="color:#909399">点击"开始模拟"将自动走完流程。</p></div><template #footer><el-button @click="uploadDialogVisible=false">取消</el-button><el-button type="primary" @click="runUploadSimulation" :loading="uploadSimulating">{{ uploadSimulating?'模拟中…':'开始模拟' }}</el-button></template></el-dialog>
+    <!-- Parse dialog (MOD-11) -->
+    <el-dialog v-model="parseDialogVisible" title="发起结构化解析（手动补发）" width="520px"><div style="font-size:12px;color:#909399;margin-bottom:12px"><i class="fa-solid fa-circle-info"></i> 接入流程中已按规则自动发起解析；此处为对失败/历史资源的手动补发入口。</div><el-form :model="parseForm" label-width="110px" size="small"><el-form-item label="目标文件"><el-input v-model="parseForm.fileName" disabled/></el-form-item><el-form-item label="解析引擎"><el-select v-model="parseForm.engine" style="width:100%"><el-option v-for="e in parseEngines" :key="e.name" :label="e.name" :value="e.name"/></el-select></el-form-item><el-form-item label="OCR识别"><el-switch v-model="parseForm.ocr"/></el-form-item><el-form-item label="表格识别"><el-switch v-model="parseForm.table"/></el-form-item><el-form-item label="公式识别"><el-switch v-model="parseForm.formula"/></el-form-item><el-form-item label="页码映射"><el-switch v-model="parseForm.pageMap"/></el-form-item><el-form-item label="生成报告"><el-switch v-model="parseForm.report"/></el-form-item></el-form><template #footer><el-button @click="parseDialogVisible=false">取消</el-button><el-button type="primary" @click="confirmParse">确认发起</el-button></template></el-dialog>
+    <!-- Parse report drawer (MOD-12) -->
+    <el-drawer v-model="parseReportVisible" title="解析报告详情" size="480px" direction="rtl"><div v-if="parseReportData" style="font-size:13px;line-height:1.8"><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">任务编号</span><span style="font-weight:600">{{ parseReportData.taskId }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">文件名</span><span style="font-weight:600">{{ parseReportData.bookName }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">总页数</span><span style="font-weight:600">{{ parseReportData.pages }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">成功页</span><span style="font-weight:600;color:#67C23A">{{ parseReportData.successPages }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">异常页</span><span style="font-weight:600;color:#F56C6C">{{ parseReportData.failedPages }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">章节/段落/图表/公式</span><span style="font-weight:600">{{ parseReportData.chapters }}/{{ parseReportData.paragraphs }}/{{ parseReportData.figures }}/{{ parseReportData.formulas }}</span></div><div style="margin-top:12px;font-weight:600;color:#303133">低置信内容列表：</div><div style="background:#fdf6ec;border:1px solid #faecd8;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;color:#E6A23C">第 {{ parseReportData.lowConfPages }} 页 — 内容模糊/排版异常，建议人工复核</div><div style="margin-top:12px;font-weight:600;color:#303133">失败页列表：</div><div style="background:#fef0f0;border:1px solid #fde2e2;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;color:#F56C6C">第 {{ parseReportData.failedPages }} 页 — 解析失败，可重新解析</div><div style="margin-top:16px;display:flex;gap:8px"><el-button size="small" @click="retryParse(parseReportData);parseReportVisible=false"><i class="fa-solid fa-rotate-right"></i> 重新解析</el-button><el-button size="small" type="primary" @click="parseReportVisible=false;currentPage='struct-calibrate'"><i class="fa-solid fa-pen"></i> 进入校准</el-button></div></div></el-drawer>
+    <!-- Edit paragraph (MOD-13) -->
+    <el-dialog v-model="editParaDialogVisible" title="编辑段落" width="520px"><el-form :model="editParaForm" label-width="90px" size="small"><el-form-item label="段落类型"><el-select v-model="editParaForm.typeLabel" style="width:100%"><el-option label="一级标题" value="一级标题"/><el-option label="二级标题" value="二级标题"/><el-option label="正文" value="正文"/><el-option label="表格" value="表格"/><el-option label="图注" value="图注"/></el-select></el-form-item><el-form-item label="正文"><el-input v-model="editParaForm.text" type="textarea" :rows="4"/></el-form-item><el-form-item label="页码"><el-input v-model="editParaForm.page"/></el-form-item><el-form-item label="置信度"><el-input v-model="editParaForm.confidence"/></el-form-item><el-form-item label="修改原因"><el-input v-model="editParaForm.reason" placeholder="必填，将记入修改历史"/></el-form-item></el-form><template #footer><el-button @click="editParaDialogVisible=false">取消</el-button><el-button type="primary" @click="saveEditPara">保存</el-button></template></el-dialog>
+    <!-- Split paragraph (MOD-13) -->
+    <el-dialog v-model="splitParaDialogVisible" title="拆分段落" width="520px"><div style="font-size:12px;color:#909399;margin-bottom:8px">原段落：</div><div style="background:#f4f6f8;border-radius:6px;padding:10px;font-size:13px;color:#606266;margin-bottom:12px">{{ splitParaForm.originalText }}</div><el-form label-width="90px" size="small"><el-form-item label="拆分位置"><el-input-number v-model="splitParaForm.position" :min="1" :max="splitParaForm.originalText.length" style="width:100%"/></el-form-item></el-form><div style="font-size:12px;color:#909399;margin-top:8px">将拆为两段：第1段截取到第 {{ splitParaForm.position }} 字，第2段为剩余内容。</div><template #footer><el-button @click="splitParaDialogVisible=false">取消</el-button><el-button type="primary" @click="confirmSplit">确认拆分</el-button></template></el-dialog>
+    <!-- Calib history (MOD-13) -->
+    <el-dialog v-model="calibHistoryVisible" title="修改历史" width="560px"><el-timeline><el-timeline-item v-for="(h,i) in calibHistory" :key="i" :timestamp="h.time" placement="top"><div style="font-size:13px;color:#303133">{{ h.action }}</div><div style="font-size:12px;color:#909399;margin-top:2px">原因：{{ h.reason }}</div></el-timeline-item></el-timeline></el-dialog>
+    <!-- View original (MOD-14) -->
+    <el-dialog v-model="pdfPreviewVisible" :title="'原文预览 · 第'+(pdfPreviewPage||1)+'页'" width="600px"><div class="pdf-preview" style="max-height:60vh;border-radius:8px"><div class="pdf-page"><div class="pdf-title">{{ pdfPreviewTitle }}</div><div class="pdf-para" style="color:#333">已定位到第 {{ pdfPreviewPage }} 页，对应片段高亮显示。原文内容预览（演示）。</div></div></div></el-dialog>
+    <!-- Citation (MOD-14) -->
+    <el-dialog v-model="citationDialogVisible" title="生成引用" width="480px"><div style="background:#f4f6f8;border-radius:8px;padding:14px;font-size:13px;color:#303133;line-height:1.8;font-family:monospace">{{ citationText }}</div><template #footer><el-button @click="citationDialogVisible=false">关闭</el-button><el-button type="primary" @click="copyCitation">复制引用</el-button></template></el-dialog>
+    <!-- Source detail (MOD-15) -->
+    <el-dialog v-model="sourceDetailVisible" title="来源片段详情" width="480px"><div v-if="sourceDetail" style="font-size:13px;line-height:1.8"><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">书名</span><span style="font-weight:600">{{ sourceDetail.book }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">章节</span><span style="font-weight:600">{{ sourceDetail.chapter }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">页码</span><span style="font-weight:600">第 {{ sourceDetail.page }} 页</span></div><div style="margin-top:8px;color:#606266">{{ sourceDetail.excerpt }}</div></div></el-dialog>
+    <!-- Citation warn (MOD-15) -->
+    <el-dialog v-model="citationWarnVisible" title="引用约束已关闭" width="440px"><el-alert type="warning" :closable="false">引用约束模式已关闭。此时模型回答可能包含无来源陈述，无法保证可追溯性。建议在正式演示与生产环境中保持开启。</el-alert><template #footer><el-button type="primary" @click="citationWarnVisible=false">我知道了</el-button></template></el-dialog>
+    <!-- Download (MOD-16) -->
+    <el-dialog v-model="downloadDialogVisible" :title="downloadTitle" width="440px"><div style="font-size:13px;color:#606266;line-height:1.8">{{ downloadMsg }}</div><template #footer><el-button v-if="downloadAllowed" type="primary" @click="confirmDownload">确认下载</el-button><el-button @click="downloadDialogVisible=false">关闭</el-button></template></el-dialog>
+    <!-- Quality exception (MOD-17) -->
+    <el-dialog v-model="qualityExcVisible" :title="'异常明细 · '+ (qualityExcRule||'')" width="720px"><el-table :data="qualityExceptions" stripe size="small" max-height="400"><el-table-column prop="resource" label="异常资源" min-width="140"/><el-table-column prop="field" label="问题字段" width="100"/><el-table-column prop="current" label="当前值" width="100"/><el-table-column prop="desc" label="问题说明" min-width="140"/><el-table-column prop="suggestion" label="修复建议" min-width="120"/><el-table-column prop="owner" label="责任人" width="80"/><el-table-column label="操作" width="90" fixed="right"><template #default="{row}"><el-button link type="primary" size="small" @click="jumpToFix(row)">跳转编辑</el-button></template></el-table-column></el-table></el-dialog>
+    <!-- Lineage detail (MOD-18) -->
+    <el-dialog v-model="lineageDetailVisible" :title="'血缘节点详情 · '+ (lineageDetailNode?.name||'')" width="520px"><div v-if="lineageDetailNode" style="font-size:13px;line-height:1.8"><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">节点</span><span style="font-weight:600">{{ lineageDetailNode.name }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">说明</span><span>{{ lineageDetailNode.detail }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">任务编号</span><span>{{ lineageDetailNode.taskId||'B20260610' }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">处理批次</span><span>{{ lineageDetailNode.batch||'B20260610' }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">原文页码</span><span>{{ lineageDetailNode.page||'42-43' }}</span></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><el-button size="small" @click="currentPage='struct-parse';lineageDetailVisible=false">查看处理批次</el-button><el-button size="small" @click="viewOriginalPage({book:lineageResourceName,chapter:'第三章',page:42,title:lineageResourceName});lineageDetailVisible=false">查看原文页码</el-button><el-button size="small" @click="currentPage='sec-audit';lineageDetailVisible=false">查看审计记录</el-button></div></div></el-dialog>
+    <!-- API test (MOD-21) -->
+    <el-dialog v-model="apiTestVisible" :title="'接口测试 · '+ (apiTestApi?.path||'')" width="640px"><div style="font-size:12px;color:#909399;margin-bottom:8px">请求方法：{{ apiTestApi?.method }} · 已联动调用计数 +1 并写入审计日志</div><div style="background:#1e1e1e;color:#0f0;border-radius:6px;padding:12px;font-size:12px;font-family:monospace;max-height:320px;overflow:auto;white-space:pre-wrap">{{ apiTestResponse }}</div><template #footer><el-button @click="apiTestVisible=false">关闭</el-button></template></el-dialog>
+    <!-- Callback detail (MOD-22) -->
+    <el-dialog v-model="callbackDetailVisible" title="回流详情" width="520px"><div v-if="callbackDetail" style="font-size:13px;line-height:1.8"><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">标题</span><span style="font-weight:600">{{ callbackDetail.title }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">模块</span><span>{{ callbackDetail.module }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">时间</span><span>{{ callbackDetail.time }}</span></div><div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="color:#909399">状态</span><span><el-tag size="small" :type="callbackDetail.status==='success'?'success':callbackDetail.status==='pending'?'warning':'danger'">{{ callbackDetail.statusLabel }}</el-tag></span></div><div style="margin-top:8px;color:#606266">{{ callbackDetail.desc }}</div><div v-if="callbackDetail.status==='failed'" style="margin-top:12px"><el-button type="danger" size="small" @click="retryCallback(callbackDetail);callbackDetailVisible=false"><i class="fa-solid fa-rotate-right"></i> 重试回流</el-button></div></div></el-dialog>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.4.27/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus@2.7.3/dist/index.full.min.js"></script>
+  <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script id="app-script">
+  const {createApp,ref,reactive,computed,onMounted,nextTick,watch}=Vue;
+
+  // ===== MOD-00 全局响应式状态总线 =====
+  // ============================================================
+  // 知识数据中台 统一 Mock Store v1.0
+  // 全站唯一真值源，所有页面统一引用，禁止各页写死独立变量
+  // 口径锁定：累计接入1247 / 已确权892 / 已结构化图书86 / 知识片段52384 /
+  //           向量索引48900 / 检索RAG今日8921 / 开放接口37 / 模型网关12847 /
+  //           Agent今日234 / 结构化成果库总条数8456
+  // ============================================================
+  const store=reactive({
+    // ── 01. 总览大屏 overview（全站唯一真值）──
+    overview:{
+      resourceIngested:1247,       // 累计接入
+      authorized:892,              // 已确权
+      structuredBooks:86,          // 已结构化图书
+      knowledgeFragments:52384,    // 知识片段（chunk级）
+      vectorIndex:48900,           // 向量索引
+      ragCallsToday:8921,          // 检索·RAG今日调用
+      openApis:37,                 // 开放接口数
+      modelGatewayCalls:12847,     // 模型网关今日调用（含摘要/改写等全量AI调用）
+      agentCalls:234,              // Agent今日调用
+    },
+    // 总览趋势图（折线图，按日）
+    ingestTrend:[
+      {date:'06-11',count:38},{date:'06-12',count:52},{date:'06-13',count:47},
+      {date:'06-14',count:63},{date:'06-15',count:71},{date:'06-16',count:58},{date:'06-17',count:45}
+    ],
+    // 各专题库资源分布（饼图）
+    topicDistribution:[
+      {topic:'历史文化',count:412},{topic:'自然科学',count:286},{topic:'文学艺术',count:198},
+      {topic:'社会科学',count:174},{topic:'工程技术',count:127},{topic:'其他',count:50}
+    ],
+    // 加工状态分布（饼图）
+    processStatusDistribution:[
+      {status:'已结构化',count:86,color:'#52c41a'},
+      {status:'解析中',count:12,color:'#1677ff'},
+      {status:'待解析',count:38,color:'#faad14'},
+      {status:'原始归档',count:1111,color:'#d9d9d9'}
+    ],
+    // 数据成熟度分布（横条图）
+    maturityDistribution:[
+      {level:'L4',label:'知识化',count:24},
+      {level:'L3',label:'深度结构化',count:42},
+      {level:'L2',label:'基础结构化',count:62},
+      {level:'L1',label:'元数据完整',count:198},
+      {level:'L0',label:'原始归档',count:921}
+    ],
+    // 本周检索热词
+    hotSearchWords:[
+      {word:'大运河',count:284},{word:'漕运',count:196},{word:'水利',count:178},
+      {word:'明清',count:165},{word:'江南',count:143},{word:'园林',count:128},
+      {word:'史料',count:116},{word:'图鉴',count:98}
+    ],
+    // 专题库导航
+    topicLibraries:[
+      {name:'历史文化专题库',count:412,icon:'📚',maturity:'L3'},
+      {name:'自然科学专题库',count:286,icon:'🔬',maturity:'L2'},
+      {name:'文学艺术专题库',count:198,icon:'🎨',maturity:'L2'},
+      {name:'社会科学专题库',count:174,icon:'🏛️',maturity:'L1'},
+      {name:'工程技术专题库',count:127,icon:'⚙️',maturity:'L1'}
+    ],
+
+    // ── 通知中心 ──
+    notifications:[
+      {id:1,text:'《大运河水利史》结构化解析已完成',time:'2分钟前',icon:'fa-solid fa-check',color:'#67C23A',read:false,page:'struct-parse'},
+      {id:2,text:'3项资源版权即将到期，请处理',time:'15分钟前',icon:'fa-solid fa-triangle-exclamation',color:'#E6A23C',read:false,page:'gov-copyright'},
+      {id:3,text:'结构化审核队列新增1项待审',time:'1小时前',icon:'fa-solid fa-clipboard-check',color:'#409EFF',read:false,page:'struct-audit'},
+      {id:4,text:'数据质量检核发现2项异常',time:'2小时前',icon:'fa-solid fa-bug',color:'#F56C6C',read:true,page:'gov-quality'}
+    ],
+
+    // ── 03. 资源接入统计 ──
+    ingestStats:{total:1247,todayNew:23,checkPassed:21,checkFailed:2,systemConnections:4},
+    recentUploads:[
+      {fileName:'明代地方志校注.pdf',size:'128MB',format:'PDF',checkStatus:'校验通过',copyright:'待确认',uploadTime:'2026-06-17 09:32',uploader:'张治理'},
+      {fileName:'清代江南水利全书.epub',size:'86MB',format:'EPUB',checkStatus:'校验通过',copyright:'已确权',uploadTime:'2026-06-17 08:15',uploader:'李编目'},
+      {fileName:'民国期刊合辑.zip',size:'2.1GB',format:'ZIP',checkStatus:'ISBN缺失',copyright:'待确认',uploadTime:'2026-06-16 17:44',uploader:'王校准'},
+      {fileName:'中国古代建筑图集.pdf',size:'340MB',format:'PDF',checkStatus:'校验通过',copyright:'已确权',uploadTime:'2026-06-16 14:20',uploader:'张治理'}
+    ],
+    integrityChecks:[
+      {item:'ISBN 完整性',passed:19,failed:2,rate:'90.5%'},
+      {item:'CIP 完整性',passed:18,failed:3,rate:'85.7%'},
+      {item:'版权状态确认',passed:17,failed:4,rate:'81.0%'},
+      {item:'格式合规性',passed:21,failed:0,rate:'100%'},
+      {item:'第三方素材授权',passed:15,failed:6,rate:'71.4%'}
+    ],
+
+    // ── 04. 原始资源库（模板用 name/format/size/md5/source/uploadedAt/checkStatus/checkLabel）──
+    rawResources:[
+      {id:'RAW-20260617-001',name:'明代地方志校注.pdf',format:'PDF',size:'128MB',md5:'a3f4e2...b91c',source:'编辑上传',uploadedAt:'2026-06-17 09:32',checkStatus:'registered',checkLabel:'待解析',pages:486,uploader:'张治理'},
+      {id:'RAW-20260617-002',name:'清代江南水利全书.epub',format:'EPUB',size:'86MB',md5:'c8d1f5...2a7e',source:'编辑上传',uploadedAt:'2026-06-17 08:15',checkStatus:'parsing',checkLabel:'解析中',pages:312,uploader:'李编目'},
+      {id:'RAW-20260616-001',name:'中国古代建筑图集.pdf',format:'PDF',size:'340MB',md5:'e5b2a9...4f8d',source:'编辑上传',uploadedAt:'2026-06-16 14:20',checkStatus:'parsed',checkLabel:'已解析',pages:624,uploader:'张治理'},
+      {id:'RAW-20260615-001',name:'大运河水利史.pdf',format:'PDF',size:'92MB',md5:'f1c7d4...9e3b',source:'编辑上传',uploadedAt:'2026-06-15 11:08',checkStatus:'structured',checkLabel:'已结构化',pages:256,uploader:'王校准'},
+      {id:'RAW-20260614-001',name:'江南园林营造法.pdf',format:'PDF',size:'218MB',md5:'b6a3c8...7d2f',source:'编辑上传',uploadedAt:'2026-06-14 09:45',checkStatus:'structured',checkLabel:'已结构化',pages:380,uploader:'李编目'}
+    ],
+
+    // ── 05. 解析引擎任务队列（模板用 bookName/pages/engine/ocrAccuracy/lowConfPages/progress/report）──
+    parseTasks:[
+      {id:'T2026061501',bookName:'大运河水利史',pages:256,engine:'PDF智能解析引擎',ocrAccuracy:'98.2%',lowConfPages:3,progress:100,report:{taskId:'T2026061501',pages:256,successPages:253,failedPages:3,chapters:8,paragraphs:1284,figures:46,formulas:12,lowConfPages:42},status:'已完成'},
+      {id:'T2026061601',bookName:'江南园林营造法',pages:380,engine:'PDF智能解析引擎',ocrAccuracy:'96.5%',lowConfPages:12,progress:72,report:{taskId:'T2026061601',pages:380,successPages:368,failedPages:12,chapters:12,paragraphs:2140,figures:88,formulas:0,lowConfPages:88},status:'解析中'},
+      {id:'T2026061701',bookName:'近现代出版史料汇编',pages:420,engine:'OCR图文识别引擎',ocrAccuracy:'94.1%',lowConfPages:28,progress:45,report:{taskId:'T2026061701',pages:420,successPages:412,failedPages:8,chapters:6,paragraphs:980,figures:34,formulas:0,lowConfPages:31},status:'解析中'},
+      {id:'T2026061702',bookName:'中国古代建筑图集',pages:624,engine:'PDF智能解析引擎',ocrAccuracy:'0%',lowConfPages:0,progress:0,report:null,status:'队列等待'}
+    ],
+
+    // ── 06. 结构化成果（图书级，模板用 bookName/chapters/paragraphs/fragments/maturityLevel/version/calibrator/calibratedAt）──
+    // 注意：此处为样例数据，全站已结构化图书总数以 store.overview.structuredBooks=86 为准
+    structuredResults:[
+      {id:'SR001',bookName:'大运河水利史',chapters:8,paragraphs:1284,fragments:3856,maturityLevel:'L3',version:'v1.2',calibrator:'张校对',calibratedAt:'2026-06-12'},
+      {id:'SR002',bookName:'中医药图鉴·上册',chapters:6,paragraphs:842,fragments:2410,maturityLevel:'L2',version:'v1.0',calibrator:'李审校',calibratedAt:'2026-06-10'},
+      {id:'SR003',bookName:'江苏非遗图录',chapters:4,paragraphs:412,fragments:1180,maturityLevel:'L1',version:'v0.9',calibrator:'王编辑',calibratedAt:'2026-06-08'},
+      {id:'SR004',bookName:'明代建筑图谱',chapters:12,paragraphs:2104,fragments:5620,maturityLevel:'L3',version:'v2.1',calibrator:'张校对',calibratedAt:'2026-06-05'}
+    ],
+    // 结构化成果库（片段级）总条数，口径≠知识片段52384
+    resultsLibraryTotal:8456,
+
+    // ── 08. 结构化审核队列（模板用 bookName/chapter/submitter/submitTime/paragraphs）──
+    auditQueue:[
+      {id:'AQ001',bookName:'大运河水利史',chapter:'第三章 运河管理制度',submitter:'张校对',submitTime:'2026-06-17 14:10',paragraphs:36},
+      {id:'AQ002',bookName:'中医药图鉴·上册',chapter:'第二章 药材图解',submitter:'李审校',submitTime:'2026-06-17 11:30',paragraphs:28},
+      {id:'AQ003',bookName:'近现代出版史料汇编',chapter:'第二辑 出版机构档案',submitter:'张治理',submitTime:'2026-06-16 16:55',paragraphs:19}
+    ],
+
+    // ── 09. 知识检索默认结果 ──
+    searchResults:[
+      {id:'SR-001',title:'漕运管理制度是中国古代水利管理的重要组成部分',source:'大运河水利史',chapter:'第三章 > 第一节',page:42,authStatus:'已授权',snippet:'漕运管理制度是中国古代水利管理的重要组成部分。自隋唐大运河开通以来，历代王朝均设立了专门的漕运管理机构...',score:0.96,type:'fulltext'},
+      {id:'SR-002',title:'明清两代是中国运河管理体系最为成熟的时期',source:'大运河水利史',chapter:'第三章 > 第二节',page:47,authStatus:'已授权',snippet:'明清两代是中国运河管理体系最为成熟的时期。明代设总河都御史，统管南北运河事务...',score:0.91,type:'semantic'},
+      {id:'SR-003',title:'苏州园林选址注重因地制宜的自然山水条件',source:'江南园林营造法',chapter:'第二章 > 选址原则',page:24,authStatus:'已授权',snippet:'苏州园林选址注重因地制宜，善用自然山水条件。园主多选择近水临山之地，以减少土方工程...',score:0.87,type:'semantic'}
+    ],
+
+    // ── 10. RAG 问答（今日调用与 overview.ragCallsToday 同步）──
+    ragCallCount:8921,
+    ragChats:[
+      {id:1,title:'大运河漕运管理制度问答',createdAt:'2026-06-17 09:15',messages:[
+        {role:'user',content:'大运河漕运管理制度是如何演变的？'},
+        {role:'assistant',content:'漕运管理制度历经多朝演变：隋代设都水监，唐代增设水部郎中，明代设总河都御史，清代进一步完善。明清两代是体系最为成熟的时期。',citations:[{book:'大运河水利史',chapter:'第三章 > 第一节',page:42,excerpt:'漕运管理制度是中国古代水利管理的重要组成部分…'}]},
+        {role:'user',content:'明代具体的管理机构有哪些？'},
+        {role:'assistant',content:'明代漕运管理机构主要包括：总河都御史（统管南北运河事务）、漕运总督（负责粮食转运）、河道总督（负责水利维护）以及各地闸官等基层管理人员。',citations:[{book:'大运河水利史',chapter:'第三章 > 第二节',page:47,excerpt:'明代设总河都御史，统管南北运河事务…'}]}
+      ]},
+      {id:2,title:'江南园林营造技艺咨询',createdAt:'2026-06-16 14:30',messages:[
+        {role:'user',content:'苏州古典园林的选址有什么特点？'},
+        {role:'assistant',content:'苏州园林选址注重因地制宜，善用自然山水条件。园主多选择近水临山之地，以借景手法将自然景色引入园中，同时减少土方工程量。',citations:[{book:'江南园林营造法',chapter:'第二章 > 选址原则',page:24,excerpt:'苏州园林选址注重因地制宜…'}]}
+      ]},
+      {id:3,title:'出版史料检索',createdAt:'2026-06-15 11:20',messages:[
+        {role:'user',content:'民国时期上海有哪些重要的出版机构？'},
+        {role:'assistant',content:'根据知识库中的史料记录，民国时期上海重要的出版机构包括商务印书馆、中华书局、开明书店、良友图书公司等。其中商务印书馆是当时规模最大的综合出版机构。',citations:[]}
+      ]}
+    ],
+
+    // ── 12. 数据质量 ──
+    qualityScore:87.5,
+    qualityRules:[
+      {id:'QR-001',category:'ISBN完整性',ruleName:'ISBN格式与CIP一致性',passRate:'90.5%',anomalyCount:119,severity:'高',status:'未通过'},
+      {id:'QR-002',category:'CIP完整性',ruleName:'CIP号填写规范性检查',passRate:'85.7%',anomalyCount:178,severity:'高',status:'未通过'},
+      {id:'QR-003',category:'版权授权',ruleName:'版权状态必填校验',passRate:'81.0%',anomalyCount:237,severity:'高',status:'未通过'},
+      {id:'QR-004',category:'第三方素材授权',ruleName:'图表来源与授权完整性',passRate:'71.4%',anomalyCount:356,severity:'中',status:'未通过'},
+      {id:'QR-005',category:'结构化成果',ruleName:'结构化成果引用映射完整性',passRate:'96.2%',anomalyCount:47,severity:'低',status:'通过'},
+      {id:'QR-006',category:'元数据',ruleName:'必填元数据字段覆盖率',passRate:'93.8%',anomalyCount:77,severity:'低',status:'通过'},
+      {id:'QR-007',category:'格式合规',ruleName:'文件格式与命名规范检查',passRate:'100%',anomalyCount:0,severity:'—',status:'通过'}
+    ],
+    qualityAnomalies:{
+      'QR-001':[
+        {resourceName:'明代地方志校注',field:'ISBN',currentVal:'978-7-5343-5678',problem:'ISBN格式不完整，缺少末位校验码',suggestion:'补充完整13位ISBN',owner:'王校准'},
+        {resourceName:'民国期刊合辑',field:'ISBN',currentVal:'无',problem:'ISBN字段为空',suggestion:'联系责任编辑补录ISBN',owner:'李编目'}
+      ],
+      'QR-003':[
+        {resourceName:'明代地方志校注',field:'版权状态',currentVal:'待确认',problem:'版权状态未确认，不允许进入AI流程',suggestion:'联系版权部门确认授权',owner:'张治理'},
+        {resourceName:'民国期刊合辑',field:'版权状态',currentVal:'待确认',problem:'版权状态未确认',suggestion:'联系版权部门确认授权',owner:'李编目'},
+        {resourceName:'清代江南水利全书',field:'版权状态',currentVal:'待确认',problem:'新接入资源版权待核实',suggestion:'在版权台账中登记授权信息',owner:'王校准'}
+      ]
+    },
+
+    // ── 13. 版权授权台账（模板用 resource/owner/contractNo/authPeriod/aiQA/training/delivery/risk/status/authFile）──
+    copyrightLedger:[
+      {id:1,resource:'大运河水利史',owner:'凤凰社',contractNo:'HT-2023-0456',authPeriod:'2023-08至2033-08',aiQA:true,training:true,delivery:false,risk:'低',status:'confirmed',authFile:'授权书.pdf'},
+      {id:2,resource:'江南园林营造法',owner:'凤凰社',contractNo:'HT-2023-0512',authPeriod:'2023-11至2033-11',aiQA:true,training:true,delivery:true,risk:'低',status:'confirmed',authFile:'授权书.pdf'},
+      {id:3,resource:'近现代出版史料汇编',owner:'凤凰社',contractNo:'HT-2024-0078',authPeriod:'2024-03至2034-03',aiQA:true,training:false,delivery:false,risk:'中',status:'confirmed',authFile:'授权协议.pdf'},
+      {id:4,resource:'中国陶瓷艺术图鉴',owner:'凤凰社',contractNo:'HT-2024-0123',authPeriod:'2024-01至2034-01',aiQA:true,training:true,delivery:true,risk:'低',status:'confirmed',authFile:'授权书.pdf'},
+      {id:5,resource:'明代地方志校注',owner:'凤凰社',contractNo:'HT-2024-0201',authPeriod:'2024-05至2034-05',aiQA:false,training:false,delivery:false,risk:'高',status:'pending',authFile:''},
+      {id:6,resource:'清代江南水利全书',owner:'待确认',contractNo:'待签',authPeriod:'待确认',aiQA:false,training:false,delivery:false,risk:'中',status:'pending',authFile:''}
+    ],
+    // 版权四卡片统计（与 overview.authorized=892 同步）
+    copyrightStats:{confirmed:892,pending:64,expiring30d:12,highRisk:7},
+
+    // ── 14. 审计日志（模板用 time/user/action/actionType/target/detail/ip/success）──
+    auditLogs:[
+      {id:1,time:'2026-06-17 14:32:05',user:'数据治理管理员',action:'检索',actionType:'primary',target:'大运河水利史',detail:'全文检索关键词"漕运管理"',ip:'10.0.1.23',success:true},
+      {id:2,time:'2026-06-17 14:28:41',user:'张校对',action:'结构化入库',actionType:'success',target:'大运河水利史·第三章',detail:'审核通过，生成v1.2版本',ip:'10.0.1.45',success:true},
+      {id:3,time:'2026-06-17 14:15:20',user:'李审校',action:'下载',actionType:'warning',target:'中医药图鉴·上册.pdf',detail:'原件下载',ip:'10.0.1.67',success:true},
+      {id:4,time:'2026-06-17 13:50:33',user:'系统',action:'RAG',actionType:'info',target:'RAG问答',detail:'用户提问"明代运河管理"，调用模型GPT-4',ip:'10.0.0.1',success:true},
+      {id:5,time:'2026-06-17 13:42:18',user:'王编辑',action:'上传',actionType:'success',target:'江苏非遗图录.zip',detail:'批量导入，96页',ip:'10.0.1.89',success:true},
+      {id:6,time:'2026-06-17 13:30:05',user:'数据治理管理员',action:'管理',actionType:'primary',target:'版权台账',detail:'修改《中医药图鉴》AI问答授权为禁止',ip:'10.0.1.23',success:true},
+      {id:7,time:'2026-06-17 12:15:44',user:'外部系统',action:'API',actionType:'info',target:'/api/v1/search/fulltext',detail:'第三方调用全文检索接口',ip:'203.0.113.5',success:true},
+      {id:8,time:'2026-06-17 11:08:22',user:'张校对',action:'导出',actionType:'warning',target:'结构化成果导出',detail:'导出大运河水利史结构化数据',ip:'10.0.1.45',success:true},
+      {id:9,time:'2026-06-17 10:34',user:'张治理',action:'推送至加工平台',actionType:'success',target:'大运河水利史',detail:'推送至高质量数据集加工平台',ip:'10.0.1.23',success:true},
+      {id:10,time:'2026-06-17 09:32',user:'张治理',action:'上传',actionType:'success',target:'明代地方志校注.pdf',detail:'资源上传，128MB',ip:'10.0.1.23',success:true}
+    ],
+
+    // ── 15. 异常预警 ──
+    alerts:[
+      {id:'ALT-001',time:'2026-06-17 03:21',type:'异常下载',level:'高',resource:'明代地方志校注（机密级）',desc:'非授权IP尝试下载机密级资源，已自动拦截',status:'待处理'},
+      {id:'ALT-002',time:'2026-06-16 22:14',type:'版权到期预警',level:'中',resource:'—',desc:'12项资源版权将在30天内到期，请及时续签',status:'待处理'},
+      {id:'ALT-003',time:'2026-06-16 18:05',type:'解析失败',level:'低',resource:'近现代出版史料汇编.pdf',desc:'3页解析失败（P118, P245, P386），建议人工复核',status:'待处理'},
+      {id:'ALT-004',time:'2026-06-15 09:30',type:'RAG越权',level:'中',resource:'明代地方志校注',desc:'被禁止AI问答资源收到RAG检索请求，已自动拦截',status:'已处理'}
+    ],
+
+    // ── 16. 接口服务 — 数据网关 ──
+    apiCallCount:4736,
+    apiCallsTodayTotal:18334,
+    apis:{
+      resource:[
+        {method:'GET',path:'/api/v1/resources',desc:'资源列表查询',auth:'API Key',callsToday:1240,latency:'45ms',status:'正常'},
+        {method:'GET',path:'/api/v1/resources/{id}',desc:'资源详情',auth:'API Key',callsToday:890,latency:'38ms',status:'正常'},
+        {method:'POST',path:'/api/v1/resources/push',desc:'推送至加工平台',auth:'OAuth2',callsToday:156,latency:'120ms',status:'正常'}
+      ],
+      structured:[
+        {method:'GET',path:'/api/v1/structured/{id}',desc:'结构化成果查询',auth:'API Key',callsToday:680,latency:'52ms',status:'正常'},
+        {method:'GET',path:'/api/v1/structured/{id}/export',desc:'结构化成果导出',auth:'OAuth2',callsToday:124,latency:'230ms',status:'正常'}
+      ],
+      search:[
+        {method:'POST',path:'/api/v1/search/fulltext',desc:'全文检索',auth:'API Key',callsToday:3420,latency:'85ms',status:'正常'},
+        {method:'POST',path:'/api/v1/search/semantic',desc:'语义检索',auth:'API Key',callsToday:2180,latency:'145ms',status:'正常'},
+        {method:'POST',path:'/api/v1/search/hybrid',desc:'混合检索',auth:'API Key',callsToday:1560,latency:'165ms',status:'正常'},
+        {method:'GET',path:'/api/v1/search/facet',desc:'分面导航',auth:'API Key',callsToday:520,latency:'72ms',status:'正常'}
+      ],
+      ai:[
+        {method:'POST',path:'/api/v1/rag/chat',desc:'RAG知识问答',auth:'OAuth2',callsToday:1761,latency:'680ms',status:'正常'},
+        {method:'POST',path:'/api/v1/rag/context',desc:'检索上下文构建',auth:'OAuth2',callsToday:892,latency:'340ms',status:'正常'},
+        {method:'POST',path:'/api/v1/agent/run',desc:'Agent任务执行',auth:'OAuth2',callsToday:234,latency:'1.2s',status:'正常'}
+      ],
+      security:[
+        {method:'POST',path:'/api/v1/auth/verify',desc:'权限校验',auth:'OAuth2',callsToday:4521,latency:'28ms',status:'正常'},
+        {method:'GET',path:'/api/v1/audit/logs',desc:'审计日志查询',auth:'OAuth2',callsToday:156,latency:'95ms',status:'正常'}
+      ]
+    },
+
+    // ── 17. 成果回流 ──
+    structuredFlowback:[
+      {id:'FB-S-001',source:'HDPP加工平台',dataset:'凤凰出版NER标注集v2.1',count:12845,qualityScore:91.2,status:'回流成功',time:'2026-06-16 15:20'},
+      {id:'FB-S-002',source:'HDPP加工平台',dataset:'大运河史料问答对数据集',count:3620,qualityScore:88.5,status:'回流成功',time:'2026-06-15 11:34'},
+      {id:'FB-S-003',source:'HDPP加工平台',dataset:'近现代历史文献分类集v1.0',count:28400,qualityScore:85.3,status:'回流失败',time:'2026-06-14 09:12',failReason:'质量分低于阈值 (85.3 < 85)，请复核后重试'}
+    ],
+    knowledgeFlowback:[
+      {id:'FB-K-001',source:'HDPP加工平台',dataset:'RLHF偏好标注-历史类',count:1280,qualityScore:79.0,status:'回流失败',time:'2026-06-17 08:30',failReason:'质量分（79.0）低于回流阈值（85），请提升质量后重试'},
+      {id:'FB-K-002',source:'HDPP加工平台',dataset:'中文历史文献实体关系三元组集',count:8640,qualityScore:92.4,status:'回流成功',time:'2026-06-13 14:22'}
+    ],
+
+    // ── 18. 运营反馈 — 热点问题（模板用 question/count/trend）──
+    feedbackHotQuestions:[
+      {question:'大运河水利史中明代漕运管理机构有哪些？',count:284,trend:'↑'},
+      {question:'江南园林的选址有什么特点和原则？',count:196,trend:'↑'},
+      {question:'清代运河的维护制度与前朝有何区别？',count:165,trend:'→'},
+      {question:'民国时期重要的出版机构有哪些？',count:143,trend:'↓'},
+      {question:'苏州园林水景营造的主要手法是什么？',count:128,trend:'↑'}
+    ],
+
+    // ── 20. 系统设置 ──
+    systemConfig:{
+      orgMode:'single',
+      resourceCount:1247,
+      todayCalls:37000,
+      storageUsed:'2.84TB',
+      storageTotal:'10TB',
+      elasticsearchStatus:'正常',
+      vectorDBStatus:'正常',
+      objectStorageStatus:'正常',
+      departments:5,users:28,roles:8
+    },
+
+    // 兼容字段（历史引用）
+    searchIndex:52384
+  });
+
+  // helper: 追加审计日志（Append-Only 模拟）
+  function addAuditLog(entry){
+    const id=store.auditLogs.length?store.auditLogs[0].id+1:1;
+    const now=new Date();
+    const pad=n=>String(n).padStart(2,'0');
+    const time=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    store.auditLogs.unshift({id,time,user:entry.user||'数据治理管理员',action:entry.action,actionType:entry.actionType||'primary',target:entry.target,detail:entry.detail,ip:entry.ip||'10.0.1.23',success:entry.success!==false});
+  }
+
+  // helper: 推送通知
+  function pushNotif(text,icon,color,page){
+    const id=store.notifications.length?Math.max(...store.notifications.map(n=>n.id))+1:1;
+    store.notifications.unshift({id,text,time:'刚刚',icon:icon||'fa-solid fa-bell',color:color||'#409EFF',read:false,page:page||'dashboard'});
+  }
+
+  const app=createApp({
+    setup(){
+      // ===== 基础 UI 状态 =====
+      const isDark=ref(false);
+      const sidebarCollapsed=ref(false);
+      const currentPage=ref('dashboard');
+      const globalSearch=ref('');
+      const notifPanelOpen=ref(false);
+
+      const toggleTheme=()=>{
+        isDark.value=!isDark.value;
+        document.documentElement.classList.toggle('dark',isDark.value);
+      };
+
+      const unreadNotifCount=computed(()=>store.notifications.filter(n=>!n.read).length);
+      const markAllRead=()=>{store.notifications.forEach(n=>n.read=true)};
+      const handleNotifClick=(n)=>{
+        n.read=true;
+        if(n.page)currentPage.value=n.page;
+        notifPanelOpen.value=false;
+      };
+      const handleMenuSelect=(idx)=>{currentPage.value=idx};
+
+      const onGlobalSearchEnter=()=>{
+        if(!globalSearch.value.trim())return;
+        currentPage.value='search-fulltext';
+        // 传递到检索页
+        searchQuery.value=globalSearch.value;
+        doSearch();
+      };
+
+      const showToast=(msg,type)=>{
+        ElementPlus.ElMessage({message:msg,type:type||'info',duration:2500});
+      };
+
+      // ===== Dashboard（口径从 store.overview 取，全站唯一真值）=====
+      const fmtNum=n=>n.toLocaleString('en-US');
+      const structuredBookCount=computed(()=>store.overview.structuredBooks);
+      const dashboardStats=computed(()=>[
+        {label:'累计接入资源',value:fmtNum(store.overview.resourceIngested),icon:'fa-solid fa-database',color:'linear-gradient(135deg,#409EFF,#337ECC)',trend:'12.5%',trendUp:true,page:'asset-catalog'},
+        {label:'已结构化图书',value:fmtNum(store.overview.structuredBooks),icon:'fa-solid fa-book-open',color:'linear-gradient(135deg,#67C23A,#529B2E)',trend:'8.2%',trendUp:true,page:'struct-results'},
+        {label:'知识片段',value:fmtNum(store.overview.knowledgeFragments),icon:'fa-solid fa-puzzle-piece',color:'linear-gradient(135deg,#E6A23C,#CF8E24)',trend:'15.3%',trendUp:true,page:'resource-struct'},
+        {label:'检索·RAG今日',value:fmtNum(store.overview.ragCallsToday),icon:'fa-solid fa-magnifying-glass',color:'linear-gradient(135deg,#F56C6C,#DD5A5A)',trend:'3.1%',trendUp:false,page:'search-fulltext'}
+      ]);
+      const drillDownStat=(stat)=>{if(stat.page)currentPage.value=stat.page};
+
+      // ===== 资产目录 =====
+      const topics=ref([
+        {id:'all',name:'全部资源',icon:'fa-solid fa-layer-group',color:'#409EFF',count:'1,247'},
+        {id:'history',name:'历史文献',icon:'fa-solid fa-landmark',color:'#8B4513',count:'326'},
+        {id:'medicine',name:'中医药学',icon:'fa-solid fa-mortar-pestle',color:'#228B22',count:'218'},
+        {id:'heritage',name:'非遗文化',icon:'fa-solid fa-mask',color:'#DAA520',count:'154'},
+        {id:'architecture',name:'建筑艺术',icon:'fa-solid fa-building',color:'#4682B4',count:'98'},
+        {id:'education',name:'教育史料',icon:'fa-solid fa-graduation-cap',color:'#9370DB',count:'76'}
+      ]);
+      const activeTopic=ref('all');
+      const assetSearch=ref('');
+      const filterType=ref('');const filterStatus=ref('');const filterMaturity=ref('');
+      const viewMode=ref('card');
+      const selectedAsset=ref(null);
+      const detailTab=ref('meta');
+      const resourceTypes=['图书','图片','音视频','专题资料','数据集'];
+      const processStatuses=['已上传','校验中','待处理','已登记','结构化中','校准中','已入库','已索引','审核中'];
+      const maturityOptions=[
+        {val:'L0',label:'L0 未结构化'},
+        {val:'L1',label:'L1 已解析'},
+        {val:'L2',label:'L2 已校准'},
+        {val:'L3',label:'L3 已审核'},
+        {val:'L4',label:'L4 已发布'}
+      ];
+
+      const assetsData=ref([
+        {id:1,name:'大运河水利史',type:'图书',typeIcon:'fa-solid fa-book',typeColor:'#409EFF',isbn:'978-7-5343-XXXX-X',code:'',author:'王水利',editor:'张编辑',pubDate:'2023-06',clc:'TV882',topic:'历史文献',tags:['运河','水利史','明清'],abstract_:'系统梳理中国大运河的水利管理制度与工程技术演变。',statusKey:'stored',statusLabel:'已入库',maturityLevel:'L3',chapters:8,paragraphs:1284,fragments:3856,esIndexed:true,version:'v1.2',searchCount:342,ragCount:128,apiCount:56,copyrightOwner:'凤凰社',contractNo:'FH20230001',authPeriod:'2023-01至2033-01',aiQA:true,training:true,delivery:true,authRisk:'低',updatedAt:'2026-06-15'},
+        {id:2,name:'中医药图鉴·上册',type:'图书',typeIcon:'fa-solid fa-book',typeColor:'#67C23A',isbn:'978-7-5343-YYYY-Y',code:'',author:'李时珍(编)',editor:'李审校',pubDate:'2022-06',clc:'R281',topic:'中医药学',tags:['中药','图鉴','药材'],abstract_:'收录常用中药材图谱与功效说明。',statusKey:'structuring',statusLabel:'结构化中',maturityLevel:'L2',chapters:6,paragraphs:842,fragments:2410,esIndexed:true,version:'v1.0',searchCount:218,ragCount:0,apiCount:34,copyrightOwner:'作者',contractNo:'ZZ20220045',authPeriod:'2022-06至2026-06',aiQA:false,training:false,delivery:false,authRisk:'高',updatedAt:'2026-06-14'},
+        {id:3,name:'江苏非遗图录',type:'专题资料',typeIcon:'fa-solid fa-mask',typeColor:'#E6A23C',isbn:'',code:'FY-2024-012',author:'非遗中心',editor:'王编辑',pubDate:'2024-03',clc:'G127',topic:'非遗文化',tags:['非遗','江苏','图录'],abstract_:'江苏省非物质文化遗产图文资料汇编。',statusKey:'calibrating',statusLabel:'校准中',maturityLevel:'L1',chapters:4,paragraphs:412,fragments:1180,esIndexed:false,version:'v0.9',searchCount:89,ragCount:45,apiCount:12,copyrightOwner:'非遗中心',contractNo:'FY20240012',authPeriod:'2024-03至2027-03',aiQA:true,training:false,delivery:true,authRisk:'中',updatedAt:'2026-06-14'},
+        {id:4,name:'明代建筑图谱',type:'图片',typeIcon:'fa-solid fa-image',typeColor:'#F56C6C',isbn:'978-7-308-ZZZZ-Z',code:'',author:'建筑研究所',editor:'陈编辑',pubDate:'2021-09',clc:'TU-092',topic:'建筑艺术',tags:['明代','建筑','图谱'],abstract_:'明代官式建筑标准图谱与工程做法。',statusKey:'indexed',statusLabel:'已索引',maturityLevel:'L3',chapters:12,paragraphs:2104,fragments:5620,esIndexed:true,version:'v2.1',searchCount:176,ragCount:82,apiCount:28,copyrightOwner:'浙大社',contractNo:'ZD20210088',authPeriod:'2021-09至2026-07',aiQA:true,training:true,delivery:true,authRisk:'中',updatedAt:'2026-06-05'},
+        {id:5,name:'近代教育史料汇编',type:'数据集',typeIcon:'fa-solid fa-database',typeColor:'#9370DB',isbn:'',code:'EDU-2023-005',author:'教育研究所',editor:'刘编辑',pubDate:'2023-11',clc:'G529',topic:'教育史料',tags:['近代','教育','史料'],abstract_:'近代中国教育制度变迁原始文献数据集。',statusKey:'pending',statusLabel:'待处理',maturityLevel:'L0',chapters:0,paragraphs:0,fragments:0,esIndexed:false,version:'-',searchCount:12,ragCount:0,apiCount:0,copyrightOwner:'待确认',contractNo:'-',authPeriod:'-',aiQA:false,training:false,delivery:false,authRisk:'高',updatedAt:'2026-06-01'}
+      ]);
+
+      const filteredAssets=computed(()=>{
+        return assetsData.value.filter(a=>{
+          if(assetSearch.value&&!a.name.includes(assetSearch.value))return false;
+          if(filterType.value&&a.type!==filterType.value)return false;
+          if(filterStatus.value&&a.statusLabel!==filterStatus.value)return false;
+          if(filterMaturity.value&&a.maturityLevel!==filterMaturity.value)return false;
+          if(activeTopic.value!=='all'){
+            const t=topics.value.find(x=>x.id===activeTopic.value);
+            if(t&&a.topic!==t.name)return false;
+          }
+          return true;
+        });
+      });
+
+      const selectAsset=(asset)=>{
+        selectedAsset.value=asset;
+        detailTab.value='meta';
+      };
+
+      // MOD-02 推送门禁
+      const pushDialogVisible=ref(false);
+      const onPushToPlatform=()=>{
+        const a=selectedAsset.value;
+        if(!a)return;
+        // 门禁校验
+        if(a.maturityLevel==='L0'){showToast('门禁拦截：该资源尚未结构化（L0），不可推送','warning');return}
+        if(!a.aiQA&&a.authRisk==='高'){showToast('门禁拦截：版权未确认/高风险，不可推送','error');return}
+        pushDialogVisible.value=true;
+      };
+      const confirmPush=()=>{
+        const a=selectedAsset.value;
+        pushDialogVisible.value=false;
+        addAuditLog({action:'管理',actionType:'success',target:a.name,detail:'推送至高质量数据集加工平台'});
+        pushNotif(`《${a.name}》已推送至加工平台`,'fa-solid fa-paper-plane','#409EFF','api-callback');
+        showToast('已推送至加工平台，回流后自动更新','success');
+      };
+
+      const openStructResultFromAsset=()=>{
+        const a=selectedAsset.value;
+        if(!a)return;
+        currentPage.value='resource-struct';
+        structLibSearch.value=a.name;
+        structFilterTip.value=`已按资产目录所选资源筛选：${a.name}`;
+      };
+
+      // MOD-05 编辑元数据
+      const editMetaDialogVisible=ref(false);
+      const editMetaForm=reactive({});
+      const openEditMetaDialog=()=>{
+        const a=selectedAsset.value;if(!a)return;
+        Object.assign(editMetaForm,{isbn:a.isbn,cip:a.cip||'',author:a.author,editor:a.editor,pubDate:a.pubDate,clc:a.clc,topic:a.topic,tagsStr:(a.tags||[]).join('、'),abstract_:a.abstract_||''});
+        editMetaDialogVisible.value=true;
+      };
+      const saveEditMeta=()=>{
+        const a=selectedAsset.value;
+        a.isbn=editMetaForm.isbn;a.cip=editMetaForm.cip;a.author=editMetaForm.author;
+        a.editor=editMetaForm.editor;a.pubDate=editMetaForm.pubDate;a.clc=editMetaForm.clc;
+        a.topic=editMetaForm.topic;a.tags=editMetaForm.tagsStr.split('、').filter(Boolean);a.abstract_=editMetaForm.abstract_;
+        editMetaDialogVisible.value=false;
+        addAuditLog({action:'管理',target:a.name,detail:'编辑出版元数据'});
+        showToast('元数据已保存','success');
+      };
+
+      // MOD-05/16 管理授权
+      const editAuthDialogVisible=ref(false);
+      const editAuthForm=reactive({});
+      const openEditAuthDialog=(asset)=>{
+        const a=asset||selectedAsset.value;if(!a)return;
+        const name=a.name||a.resource;
+        Object.assign(editAuthForm,{resource:name,contractNo:a.contractNo,authFile:'',authPeriod:a.authPeriod,dbDisplay:true,aiQA:a.aiQA,training:a.training,delivery:a.delivery,thirdPartyStatus:'无',risk:a.risk||a.authRisk});
+        editAuthDialogVisible.value=true;
+      };
+      const saveEditAuth=()=>{
+        const a=assetsData.value.find(x=>x.name===editAuthForm.resource);
+        if(a){
+          a.contractNo=editAuthForm.contractNo;a.authPeriod=editAuthForm.authPeriod;
+          a.aiQA=editAuthForm.aiQA;a.training=editAuthForm.training;a.delivery=editAuthForm.delivery;a.authRisk=editAuthForm.risk;
+        }
+        // 同步版权台账（无论是否有对应资产）
+        const cl=store.copyrightLedger.find(c=>c.resource===editAuthForm.resource);
+        if(cl){cl.aiQA=editAuthForm.aiQA;cl.training=editAuthForm.training;cl.delivery=editAuthForm.delivery;cl.risk=editAuthForm.risk;cl.contractNo=editAuthForm.contractNo;cl.authPeriod=editAuthForm.authPeriod}
+        editAuthDialogVisible.value=false;
+        addAuditLog({action:'管理',target:editAuthForm.resource,detail:`修改授权：AI问答=${editAuthForm.aiQA?'允许':'禁止'}，训练=${editAuthForm.training?'允许':'禁止'}`});
+        showToast('授权已更新，RAG/推送将按新状态联动','success');
+      };
+
+      // MOD-16 下载门禁
+      const downloadDialogVisible=ref(false);
+      const downloadTitle=ref('');const downloadMsg=ref('');const downloadAllowed=ref(false);const downloadTarget=ref(null);
+      const onDownloadOriginal=()=>{
+        const a=selectedAsset.value;if(!a)return;
+        downloadTarget.value={name:a.name,type:'asset'};
+        downloadTitle.value='下载原件';
+        if(!a.delivery){downloadMsg.value='门禁拦截：该资源版权授权禁止对外交付，不可下载原件。如需使用请联系版权管理员。';downloadAllowed.value=false}
+        else{downloadMsg.value='确认下载《'+a.name+'》原件？此操作将记入审计日志。';downloadAllowed.value=true}
+        downloadDialogVisible.value=true;
+      };
+      const onDownloadOriginalFile=(row)=>{
+        downloadTarget.value={name:row.name,type:'file'};
+        downloadTitle.value='下载文件';
+        downloadMsg.value='确认下载'+row.name+'？此操作将记入审计日志。';
+        downloadAllowed.value=true;
+        downloadDialogVisible.value=true;
+      };
+      const confirmDownload=()=>{
+        downloadDialogVisible.value=false;
+        addAuditLog({action:'下载',actionType:'warning',target:downloadTarget.value.name,detail:'下载原件'});
+        showToast('下载已开始，已记入审计日志','success');
+      };
+
+      // ===== 资产编目 =====
+      const enrollmentData=ref([
+        {code:'AC-2026-001',name:'大运河水利史',isbn:'978-7-5343-XXXX-X',author:'王水利',clc:'TV882',copyrightStatus:'已确认',completeness:95},
+        {code:'AC-2026-002',name:'中医药图鉴·上册',isbn:'978-7-5343-YYYY-Y',author:'李时珍(编)',clc:'R281',copyrightStatus:'已确认',completeness:82},
+        {code:'AC-2026-003',name:'近代教育史料汇编',isbn:'',author:'教育研究所',clc:'G529',copyrightStatus:'待确认',completeness:45}
+      ]);
+      const enrollmentIssues=computed(()=>[
+        enrollmentData.value.find(e=>e.isbn==='')?`《${enrollmentData.value.find(e=>e.isbn==='').name}》缺少ISBN，请补全`:'',
+        enrollmentData.value.find(e=>e.copyrightStatus==='待确认')?`《${enrollmentData.value.find(e=>e.copyrightStatus==='待确认').name}》版权状态待确认，影响后续结构化与检索`:''
+      ].filter(Boolean));
+      const submitEnrollment=(row)=>{
+        if(row.completeness<60){showToast('编目完整率不足60%，请补全后再提交','warning');return}
+        row.copyrightStatus='已确认';
+        addAuditLog({action:'管理',target:row.name,detail:'提交编目审批'});
+        showToast('已提交审批','success');
+      };
+
+      // ===== 分级分类 / 标签 =====
+      const classificationTree=ref([
+        {name:'历史文献',icon:'fa-solid fa-landmark',color:'#8B4513',count:326,children:[{name:'运河水利',count:48},{name:'地方史志',count:120},{name:'近代史料',count:76}]},
+        {name:'中医药学',icon:'fa-solid fa-mortar-pestle',color:'#228B22',count:218,children:[{name:'药材图鉴',count:95},{name:'方剂文献',count:123}]},
+        {name:'非遗文化',icon:'fa-solid fa-mask',color:'#DAA520',count:154,children:[{name:'传统技艺',count:67},{name:'民俗',count:87}]},
+        {name:'建筑艺术',icon:'fa-solid fa-building',color:'#4682B4',count:98,children:[{name:'古建筑',count:62},{name:'工程图谱',count:36}]}
+      ]);
+      const securityLevels=ref([
+        {name:'公开级',short:'公',color:'#67C23A',desc:'可公开访问与检索',count:892},
+        {name:'内部级',short:'内',color:'#409EFF',desc:'内部授权访问',count:268},
+        {name:'敏感级',short:'敏',color:'#E6A23C',desc:'需审批后访问',count:72},
+        {name:'机密级',short:'机',color:'#F56C6C',desc:'严格限制访问',count:15}
+      ]);
+      const maturityLevels=ref([
+        {level:'L0',name:'未结构化（原始文件）',color:'#909399'},
+        {level:'L1',name:'已解析（机器结构化）',color:'#409EFF'},
+        {level:'L2',name:'已校准（人工修正）',color:'#67C23A'},
+        {level:'L3',name:'已审核（质检通过）',color:'#E6A23C'},
+        {level:'L4',name:'已发布（上线可用）',color:'#F56C6C'}
+      ]);
+      const tagCategories=ref([
+        {name:'学科分类',icon:'fa-solid fa-book',color:'#409EFF',tags:['历史','医学','建筑','教育','文学','艺术']},
+        {name:'资源形态',icon:'fa-solid fa-shapes',color:'#67C23A',tags:['图书','期刊','图谱','音视频','数据集','档案']},
+        {name:'业务标签',icon:'fa-solid fa-briefcase',color:'#E6A23C',tags:['重点项目','教材申报','数字人文','非遗保护','科研成果']}
+      ]);
+
+      // ===== MOD-10 资源接入 =====
+      const uploadStep=ref(0);
+      const uploadStatus=ref('');const uploadStatusType=ref('info');
+      const uploadChecks=ref([
+        {name:'文件格式校验',pass:true},{name:'MD5去重检查',pass:true},{name:'ISBN/CIP元数据',pass:false},{name:'版权状态标识',pass:false},{name:'对象存储归档',pass:true}
+      ]);
+      const businessSystems=ref([
+        {name:'编辑业务系统',icon:'fa-solid fa-pen-nib',color:'#409EFF',mode:'API对接',active:true},
+        {name:'版权管理系统',icon:'fa-solid fa-copyright',color:'#E6A23C',mode:'数据同步',active:true},
+        {name:'印刷管理系统',icon:'fa-solid fa-print',color:'#67C23A',mode:'定时同步',active:false}
+      ]);
+      const uploadDialogVisible=ref(false);const uploadSimulating=ref(false);
+      const startUpload=()=>{uploadDialogVisible.value=true};
+      const runUploadSimulation=()=>{
+        uploadSimulating.value=true;
+        const steps=['新增上传文件记录','格式校验中…','校验通过','元数据缺失提示补全','版权状态确认','入库归档','审计日志写入'];
+        let i=0;
+        const timer=setInterval(()=>{
+          if(i>=steps.length){
+            clearInterval(timer);uploadSimulating.value=false;uploadDialogVisible.value=false;
+            // 联动：原始资源库新增
+            const newRes={id:'R'+String(store.rawResources.length+1).padStart(3,'0'),name:'新上传文档_'+Date.now().toString().slice(-4)+'.pdf',format:'PDF',size:'12.3MB',md5:'d'+Date.now().toString(16).slice(0,11)+'...',source:'编辑上传',uploadedAt:new Date().toLocaleString('zh-CN'),checkStatus:'registered',checkLabel:'已归档'};
+            store.rawResources.unshift(newRes);
+            addAuditLog({action:'上传',actionType:'success',target:newRes.name,detail:'模拟上传流程，已归档至原始资源库'});
+            pushNotif(`新资源《${newRes.name}》已归档`,'fa-solid fa-cloud-arrow-up','#67C23A','resource-original');
+            showToast('模拟上传完成，已联动原始资源库与审计日志','success');
+            return;
+          }
+          uploadStatus.value=steps[i];uploadStatusType.value=i<2?'info':i<5?'warning':'success';
+          if(i===2){uploadStep.value=3}
+          if(i===4){uploadChecks.value[2].pass=true;uploadChecks.value[3].pass=true;uploadStep.value=5}
+          if(i===5){uploadStep.value=6}
+          i++;
+        },500);
+      };
+
+      // ===== MOD-11/12 解析引擎 =====
+      const parseEngines=ref([
+        {name:'PDF智能解析引擎',icon:'fa-solid fa-file-pdf',color:'#F56C6C',desc:'PDF版面分析+OCR+表格公式识别'},
+        {name:'EPUB结构化引擎',icon:'fa-solid fa-book',color:'#409EFF',desc:'EPUB章节拆解+语义标注'},
+        {name:'OCR图文识别引擎',icon:'fa-solid fa-font',color:'#E6A23C',desc:'图片文字识别+版面恢复'}
+      ]);
+      const parseDialogVisible=ref(false);
+      const parseForm=reactive({fileName:'',engine:'PDF智能解析引擎',ocr:true,table:true,formula:true,pageMap:true,report:true});
+      const openParseDialog=()=>{
+        parseForm.fileName='（请选择目标文件）';
+        parseDialogVisible.value=true;
+      };
+      const openParseDialogFor=(row)=>{
+        parseForm.fileName=row.name;
+        parseDialogVisible.value=true;
+      };
+      const confirmParse=()=>{
+        const task={id:'T'+Date.now(),bookName:parseForm.fileName,pages:Math.floor(Math.random()*200)+80,engine:parseForm.engine,ocrAccuracy:(95+Math.random()*4).toFixed(1)+'%',lowConfPages:Math.floor(Math.random()*8)+2,progress:0,report:null};
+        store.parseTasks.unshift(task);
+        parseDialogVisible.value=false;
+        addAuditLog({action:'结构化入库',actionType:'success',target:parseForm.fileName,detail:'手动补发结构化解析，引擎：'+parseForm.engine});
+        showToast('解析任务已创建，请到解析引擎页查看进度','success');
+        // 模拟进度推进
+        const progTimer=setInterval(()=>{
+          task.progress+=Math.floor(Math.random()*15)+5;
+          if(task.progress>=100){
+            task.progress=100;
+            task.report={taskId:task.id,pages:task.pages,successPages:task.pages-Math.floor(Math.random()*5),failedPages:Math.floor(Math.random()*5),chapters:Math.floor(Math.random()*8)+4,paragraphs:Math.floor(Math.random()*800)+400,figures:Math.floor(Math.random()*100)+20,formulas:Math.floor(Math.random()*20),lowConfPages:task.lowConfPages};
+            clearInterval(progTimer);
+            pushNotif(`《${task.bookName}》解析完成`,'fa-solid fa-check','#67C23A','struct-parse');
+          }
+        },800);
+      };
+      const parseReportVisible=ref(false);const parseReportData=ref(null);
+      const openParseReport=(row)=>{
+        parseReportData.value=row.report||{taskId:row.id,pages:row.pages,successPages:row.pages,failedPages:0,chapters:8,paragraphs:1200,figures:40,formulas:10,lowConfPages:row.lowConfPages};
+        parseReportVisible.value=true;
+      };
+      const retryParse=(row)=>{
+        row.progress=0;
+        addAuditLog({action:'结构化入库',target:row.bookName,detail:'重新发起解析'});
+        showToast('已重新发起解析','info');
+        const t=setInterval(()=>{row.progress+=Math.floor(Math.random()*20)+10;if(row.progress>=100){row.progress=100;clearInterval(t);showToast(`《${row.bookName}》解析完成`,'success')}},600);
+      };
+
+      // ===== MOD-08/13 校准工作台 =====
+      const calibrationChapters=ref([
+        {id:'c1',name:'第一节 漕运管理机构的演变',active:true},
+        {id:'c2',name:'第二节 明清时期的运河管理体系',active:false},
+        {id:'c3',name:'第三节 运河维护与疏浚制度',active:false}
+      ]);
+      const structItems=ref([
+        {id:'s1',typeLabel:'一级标题',typeTag:'danger',confidence:98,page:42,text:'第三章 运河管理制度'},
+        {id:'s2',typeLabel:'二级标题',typeTag:'warning',confidence:95,page:42,text:'第一节 漕运管理机构的演变'},
+        {id:'s3',typeLabel:'正文',typeTag:'',confidence:92,page:42,text:'漕运管理制度是中国古代水利管理的重要组成部分。自隋唐大运河开通以来，历代王朝均设立了专门的漕运管理机构，以确保粮食物资的顺利运输和运河水道的维护管理。'},
+        {id:'s4',typeLabel:'正文',typeTag:'',confidence:88,page:42,text:'隋代设立都水监，负责全国运河及水利事务的管理。唐代在都水监基础上增设水部郎中，专门掌管运河疏浚、水闸管理和漕运调度。'},
+        {id:'s5',typeLabel:'正文',typeTag:'',confidence:65,page:43,text:'明清两代是中国运河管理体系最为成熟的时期。明代设总河都御史，统管南北运河事务，下设管河郎中、管河主事等职位。'},
+        {id:'s6',typeLabel:'图注',typeTag:'info',confidence:72,page:43,text:'图3-1 明代运河管理机构层级示意图'}
+      ]);
+      const mergeSelected=ref([]);
+      const calibHistory=ref([
+        {time:'2026-06-17 14:05',action:'编辑段落 s5（正文）',reason:'补充"管河郎中"职责说明'},
+        {time:'2026-06-17 13:50',action:'拆分段落 s3',reason:'原文过长，便于检索召回'},
+        {time:'2026-06-17 13:30',action:'合并段落 s2+s3',reason:'上下文连贯，合并提升语义完整性'}
+      ]);
+      const calibHistoryVisible=ref(false);
+      const toggleMergeMode=(item)=>{
+        const idx=mergeSelected.value.indexOf(item.id);
+        if(idx>=0)mergeSelected.value.splice(idx,1);else mergeSelected.value.push(item.id);
+      };
+      const doMerge=()=>{
+        calibHistory.value.unshift({time:new Date().toLocaleString('zh-CN'),action:`合并段落 ${mergeSelected.value.join('+')}`,reason:'人工合并提升语义完整性'});
+        mergeSelected.value=[];
+        showToast('段落已合并','success');
+      };
+      const editParaDialogVisible=ref(false);
+      const editParaForm=reactive({});
+      const openEditParagraph=(item)=>{
+        Object.assign(editParaForm,{id:item.id,typeLabel:item.typeLabel,text:item.text,page:item.page,confidence:item.confidence,reason:''});
+        editParaDialogVisible.value=true;
+      };
+      const saveEditPara=()=>{
+        const item=structItems.value.find(x=>x.id===editParaForm.id);
+        if(item){item.typeLabel=editParaForm.typeLabel;item.text=editParaForm.text;item.page=editParaForm.page;item.confidence=Number(editParaForm.confidence)}
+        calibHistory.value.unshift({time:new Date().toLocaleString('zh-CN'),action:`编辑段落 ${editParaForm.id}`,reason:editParaForm.reason||'人工修正'});
+        editParaDialogVisible.value=false;
+        showToast('段落已保存，修改已记入历史','success');
+      };
+      const splitParaDialogVisible=ref(false);
+      const splitParaForm=reactive({id:'',originalText:'',position:0});
+      const openSplitParagraph=(item)=>{
+        Object.assign(splitParaForm,{id:item.id,originalText:item.text,position:Math.floor(item.text.length/2)});
+        splitParaDialogVisible.value=true;
+      };
+      const confirmSplit=()=>{
+        const item=structItems.value.find(x=>x.id===splitParaForm.id);
+        if(item){
+          const pos=splitParaForm.position;
+          const t1=item.text.slice(0,pos);const t2=item.text.slice(pos);
+          item.text=t1;
+          const idx=structItems.value.indexOf(item);
+          structItems.value.splice(idx+1,0,{id:'s'+Date.now(),typeLabel:item.typeLabel,typeTag:item.typeTag,confidence:item.confidence,page:item.page,text:t2});
+        }
+        calibHistory.value.unshift({time:new Date().toLocaleString('zh-CN'),action:`拆分段落 ${splitParaForm.id}`,reason:'人工拆分，位置第'+splitParaForm.position+'字'});
+        splitParaDialogVisible.value=false;
+        showToast('段落已拆分','success');
+      };
+
+      // MOD-08 提交审核
+      const submitAuditDialogVisible=ref(false);
+      const submitCalibration=()=>{submitAuditDialogVisible.value=true};
+      const confirmSubmitAudit=()=>{
+        submitAuditDialogVisible.value=false;
+        store.auditQueue.push({id:'AQ'+Date.now(),bookName:'大运河水利史',chapter:'第三章 运河管理制度',submitter:'数据治理管理员',submitTime:new Date().toLocaleString('zh-CN'),paragraphs:36});
+        addAuditLog({action:'结构化入库',actionType:'success',target:'大运河水利史·第三章',detail:'提交结构化审核'});
+        pushNotif('结构化审核队列新增1项待审','fa-solid fa-clipboard-check','#409EFF','struct-audit');
+        showToast('已提交至审核队列','success');
+      };
+      const approveStructAudit=(item)=>{
+        const idx=store.auditQueue.indexOf(item);
+        if(idx>=0)store.auditQueue.splice(idx,1);
+        // 成果库新增/更新版本
+        const sr=store.structuredResults.find(s=>s.bookName===item.bookName);
+        if(sr){sr.version='v'+(parseFloat(sr.version.slice(1))+0.1).toFixed(1);sr.maturityLevel='L3';sr.calibratedAt=new Date().toISOString().slice(0,10)}
+        addAuditLog({action:'结构化入库',actionType:'success',target:item.bookName+'·'+item.chapter,detail:'审核通过，生成新版本，同步全文索引+向量索引+来源追溯'});
+        pushNotif(`《${item.bookName}》结构化审核通过，成果库已更新`,'fa-solid fa-check','#67C23A','struct-results');
+        showToast('审核通过，成果库已更新版本','success');
+      };
+      const rejectStructAudit=(item)=>{
+        const idx=store.auditQueue.indexOf(item);
+        if(idx>=0)store.auditQueue.splice(idx,1);
+        addAuditLog({action:'结构化入库',actionType:'danger',target:item.bookName+'·'+item.chapter,detail:'审核驳回，退回校准',success:false});
+        showToast('已驳回，退回校准工作台','warning');
+      };
+
+      // ===== MOD-05/20 结构化成果库 =====
+      const structLibSearch=ref('');const structLibMaturity=ref('');const structFilterTip=ref('');
+      const structLibData=ref([]);
+      (function initStructLib(){
+        const books=store.structuredResults;
+        const types=['正文','标题','图注','表格'];
+        books.forEach(b=>{
+          for(let i=0;i<8;i++){
+            structLibData.value.push({id:'SR-'+b.id+'-'+String(i+1).padStart(3,'0'),bookName:b.bookName,chapter:'第'+['一','二','三','四','五'][i%5]+'章 · '+(i%2?'上':'下')+'篇',type:types[i%4],pageRange:(i*5+20)+'-'+(i*5+24),maturityLevel:b.maturityLevel,batch:'B20260610'});
+          }
+        });
+      })();
+      const filteredStructLib=computed(()=>{
+        return structLibData.value.filter(r=>{
+          if(structLibSearch.value&&!r.bookName.includes(structLibSearch.value)&&!r.chapter.includes(structLibSearch.value))return false;
+          if(structLibMaturity.value&&r.maturityLevel!==structLibMaturity.value)return false;
+          return true;
+        });
+      });
+      const clearStructFilter=()=>{structLibSearch.value='';structFilterTip.value=''};
+      const viewStructResult=(row)=>{pdfPreviewTitle.value=row.bookName;pdfPreviewPage.value=parseInt(row.pageRange);pdfPreviewVisible.value=true};
+      const locateOriginalPage=(row)=>{viewOriginalPage({book:row.bookName,chapter:row.chapter,page:parseInt(row.pageRange),title:row.bookName})};
+
+      // 结构化成果页
+      const structResultSearch=ref('');
+      const filteredStructResults=computed(()=>{
+        if(!structResultSearch.value)return store.structuredResults;
+        return store.structuredResults.filter(r=>r.bookName.includes(structResultSearch.value));
+      });
+
+      // ===== MOD-03/14/19 检索 =====
+      const searchQuery=ref('');const searchResults=ref(store.searchResults?[...store.searchResults]:[]);const searchTip=ref('');
+      const facets=ref(['漕运管理','运河疏浚','明清水利','水闸制度','都水监','总河都御史']);
+      const mockSearchPool=[
+        {book:'大运河水利史',chapter:'第三章 运河管理制度',page:42,title:'漕运管理机构的演变',snippet:'漕运管理制度是中国古代水利管理的重要组成部分。自隋唐大运河开通以来，历代王朝均设立了专门的漕运管理机构，以确保<span class="pdf-highlight">粮食物资的顺利运输</span>和运河水道的维护管理。',tags:'历史·运河',auth:'已授权',year:'2023'},
+        {book:'大运河水利史',chapter:'第三章 运河管理制度',page:43,title:'明清运河管理体系',snippet:'明清两代是中国运河管理体系最为成熟的时期。明代设<span class="pdf-highlight">总河都御史</span>，统管南北运河事务，下设管河郎中、管河主事等职位。',tags:'历史·明清',auth:'已授权',year:'2023'},
+        {book:'明代建筑图谱',chapter:'第五章 官式建筑',page:88,title:'运河沿线建筑规制',snippet:'运河沿线城市建筑受漕运经济影响，形成独特的商业建筑风格与码头仓储规制。',tags:'建筑·明代',auth:'已授权',year:'2021'},
+        {book:'江苏非遗图录',chapter:'第二章 运河民俗',page:56,title:'运河船工号子',snippet:'运河船工号子是漕运文化的重要非物质文化遗产，反映了古代水上运输劳动场景。',tags:'非遗·民俗',auth:'已授权',year:'2024'}
+      ];
+      const doSearch=()=>{
+        if(!searchQuery.value.trim()){showToast('请输入检索词','info');return}
+        searchTip.value='';
+        const isSemantic=['search-semantic','search-hybrid'].includes(currentPage.value);
+        const results=mockSearchPool.filter(r=>r.title.includes(searchQuery.value)||r.snippet.includes(searchQuery.value)||(isSemantic&&r.book.includes(searchQuery.value)));
+        // 语义检索放宽匹配
+        searchResults.value=results.length?results:(isSemantic?mockSearchPool.slice(0,2):[]);
+        addAuditLog({action:'检索',actionType:'primary',target:searchQuery.value,detail:currentPage.value+'，命中'+searchResults.value.length+'条'});
+        if(isSemantic)searchTip.value='语义检索已启用向量召回，结果按相似度排序';
+        else searchTip.value='全文检索完成，结果按相关度排序';
+      };
+      // 原文预览
+      const pdfPreviewVisible=ref(false);const pdfPreviewPage=ref(1);const pdfPreviewTitle=ref('');
+      const viewOriginalPage=(r)=>{
+        pdfPreviewTitle.value=r.title||r.book;pdfPreviewPage.value=r.page||1;pdfPreviewVisible.value=true;
+      };
+      // 生成引用
+      const citationDialogVisible=ref(false);const citationText=ref('');
+      const generateCitation=(r)=>{
+        citationText.value=`${r.book}. ${r.chapter}[M]. 第${r.page}页. ${r.year}年.`;
+        citationDialogVisible.value=true;
+      };
+      const copyCitation=()=>{
+        navigator.clipboard&&navigator.clipboard.writeText(citationText.value);
+        showToast('引用已复制到剪贴板','success');
+      };
+      // 加入RAG上下文
+      const ragContext=ref(null);
+      const addToRagContext=(r)=>{
+        ragContext.value={book:r.book,page:r.page,chapter:r.chapter};
+        showToast('已加入RAG问答上下文，可在RAG页引用','success');
+      };
+
+      // ===== MOD-15 RAG（绑定 store.ragChats）=====
+      const ragChats=computed(()=>store.ragChats.map(c=>({id:c.id,title:c.title,time:c.createdAt})));
+      const activeChat=ref(1);
+      const chats=reactive({
+        1:[{role:'assistant',content:'您好，我是知识中台RAG助手，可基于已结构化的出版资源回答问题。请问您想了解什么？'}],
+        2:[{role:'assistant',content:'您好，请输入您的问题。'}]
+      });
+      const currentChatMessages=computed(()=>chats[activeChat.value]||[]);
+      const chatInput=ref('');const ragProcessing=ref(false);const ragProcessText=ref('');const evidenceVisible=reactive({});
+      const citationMode=ref(true);
+      const citationWarnVisible=ref(false);
+      const sourceDetailVisible=ref(false);const sourceDetail=ref(null);
+
+      const newChat=()=>{
+        const id=Math.max(...ragChats.value.map(c=>c.id))+1;
+        ragChats.value.unshift({id,title:'新对话',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})});
+        chats[id]=[{role:'assistant',content:'新对话已创建，请输入您的问题。'}];
+        activeChat.value=id;
+      };
+      const switchChat=(id)=>{activeChat.value=id};
+      const onCitationModeChange=(val)=>{
+        if(!val)citationWarnVisible.value=true;
+        addAuditLog({action:'RAG',target:'引用约束模式',detail:val?'开启':'关闭'});
+      };
+      const sendChat=()=>{
+        const q=chatInput.value.trim();if(!q||ragProcessing.value)return;
+        chats[activeChat.value].push({role:'user',content:q});
+        chatInput.value='';
+        ragProcessing.value=true;
+        const steps=['正在检索知识库…','向量召回中…','重排序Top5片段…','版权校验中…','生成回答…'];
+        let si=0;
+        const stepTimer=setInterval(()=>{
+          if(si>=steps.length){
+            clearInterval(stepTimer);
+            // 版权拦截检查
+            const blockedBooks=store.copyrightLedger.filter(c=>!c.aiQA).map(c=>c.resource);
+            let answer='';
+            let citations=[];
+            let retrievalEvidence=null;
+            if(q.includes('运河')||q.includes('漕运')){
+              answer='根据《大运河水利史》记载，明清两代是中国运河管理体系最为成熟的时期。明代设<b>总河都御史</b>，统管南北运河事务，下设管河郎中、管河主事等职位，形成了从中央到地方的垂直管理体系。';
+              citations=[
+                {book:'大运河水利史',chapter:'第三章 运河管理制度',page:42,excerpt:'漕运管理制度是中国古代水利管理的重要组成部分…'},
+                {book:'大运河水利史',chapter:'第三章 运河管理制度',page:43,excerpt:'明代设总河都御史，统管南北运河事务…'}
+              ];
+              retrievalEvidence={query:q,hitCount:5,top5:[
+                {similarity:'0.92',book:'大运河水利史',page:42,auth:'已授权',used:true},
+                {similarity:'0.88',book:'大运河水利史',page:43,auth:'已授权',used:true},
+                {similarity:'0.85',book:'明代建筑图谱',page:88,auth:'已授权',used:false},
+                {similarity:'0.79',book:'江苏非遗图录',page:56,auth:'已授权',used:false},
+                {similarity:'0.72',book:'中医药图鉴·上册',page:120,auth:'禁止',used:false}
+              ]};
+            }else if(q.includes('版权')&&blockedBooks.length){
+              answer=`检测到以下资源版权禁止AI问答：${blockedBooks.join('、')}。已自动从检索结果中过滤。`;
+            }else{
+              answer='已基于知识库检索相关内容。根据已结构化资源，该问题的相关内容可在《大运河水利史》等文献中找到参考。如需更详细解答，请尝试更具体的提问。';
+              citations=[{book:'大运河水利史',chapter:'第三章',page:42,excerpt:'相关内容片段…'}];
+            }
+            chats[activeChat.value].push({role:'assistant',content:answer,citations:citationMode.value?citations:[],retrievalEvidence:retrievalEvidence});
+            ragProcessing.value=false;
+            store.ragCallCount++;
+            addAuditLog({action:'RAG',actionType:'info',target:'RAG问答',detail:'问题：'+q+'，引用约束='+(citationMode.value?'开':'关')});
+            nextTick(()=>{const box=document.querySelector('.chat-messages');if(box)box.scrollTop=box.scrollHeight});
+          }else{
+            ragProcessText.value=steps[si];si++;
+          }
+        },600);
+      };
+      const openCitationDetail=(cit)=>{
+        sourceDetail.value=cit;sourceDetailVisible.value=true;
+      };
+      const toggleEvidence=(idx)=>{evidenceVisible[idx]=!evidenceVisible[idx]};
+
+      // ===== AI 模型 / Agent / 提示词 =====
+      const aiModels=ref([
+        {name:'GPT-4',provider:'OpenAI',type:'对话生成',active:true,latency:'1.2s',calls:3284},
+        {name:'Claude-3',provider:'Anthropic',type:'对话生成',active:true,latency:'0.9s',calls:2156},
+        {name:'BGE-M3',provider:'智源',type:'向量编码',active:true,latency:'0.3s',calls:8420},
+        {name:'bge-reranker',provider:'智源',type:'重排序',active:true,latency:'0.2s',calls:8420},
+        {name:'Qwen-VL',provider:'阿里',type:'图文识别',active:false,latency:'1.5s',calls:0}
+      ]);
+      const agentList=ref([
+        {name:'文献检索Agent',scene:'学术研究',model:'GPT-4',active:true,calls:128,satisfaction:4.5},
+        {name:'知识问答Agent',scene:'读者服务',model:'Claude-3',active:true,calls:89,satisfaction:4.3},
+        {name:'内容审核Agent',scene:'质量管理',model:'GPT-4',active:false,calls:17,satisfaction:4.1}
+      ]);
+      const promptTemplates=ref([
+        {id:1,name:'结构化摘要',icon:'fa-solid fa-align-left',color:'#409EFF',desc:'生成文档段落级摘要，保留关键信息',tags:['摘要','结构化']},
+        {id:2,name:'知识抽取',icon:'fa-solid fa-brain',color:'#67C23A',desc:'从文本中抽取实体、关系、事件',tags:['NER','知识图谱']},
+        {id:3,name:'问答生成',icon:'fa-solid fa-comments',color:'#E6A23C',desc:'基于检索结果生成引用约束回答',tags:['RAG','问答']},
+        {id:4,name:'敏感过滤',icon:'fa-solid fa-shield',color:'#F56C6C',desc:'过滤个人隐私与敏感信息',tags:['合规','过滤']},
+        {id:5,name:'标题改写',icon:'fa-solid fa-pen',color:'#9370DB',desc:'优化章节标题可读性',tags:['编辑','改写']},
+        {id:6,name:'引用校验',icon:'fa-solid fa-quote-right',color:'#8B4513',desc:'校验回答引用是否可追溯',tags:['引用','校验']}
+      ]);
+
+      // ===== 元数据 =====
+      const metadataData=ref([
+        {name:'图书出版元数据',source:'编目系统',fields:24,records:1247,quality:92,lastSync:'2026-06-17 12:00'},
+        {name:'结构化元数据',source:'解析引擎',fields:18,records:52384,quality:88,lastSync:'2026-06-17 10:30'},
+        {name:'版权授权元数据',source:'版权系统',fields:12,records:892,quality:95,lastSync:'2026-06-17 09:00'}
+      ]);
+
+      // ===== MOD-17 数据质量 =====
+      const qualityDimensions=ref([
+        {name:'完整性',score:94,icon:'fa-solid fa-circle-check',color:'#67C23A'},
+        {name:'准确性',score:91,icon:'fa-solid fa-bullseye',color:'#409EFF'},
+        {name:'一致性',score:88,icon:'fa-solid fa-equals',color:'#E6A23C'},
+        {name:'时效性',score:85,icon:'fa-solid fa-clock',color:'#9370DB'},
+        {name:'唯一性',score:97,icon:'fa-solid fa-fingerprint',color:'#F56C6C'},
+        {name:'规范性',score:83,icon:'fa-solid fa-ruler',color:'#8B4513'}
+      ]);
+      const qualityRules=ref([
+        {name:'ISBN格式校验',dimension:'规范性',target:'图书元数据',passRate:92,exceptions:8,lastRun:'2026-06-17 08:00'},
+        {name:'必填字段检查',dimension:'完整性',target:'编目记录',passRate:88,exceptions:12,lastRun:'2026-06-17 08:00'},
+        {name:'版权状态一致性',dimension:'一致性',target:'版权台账',passRate:95,exceptions:3,lastRun:'2026-06-17 08:00'},
+        {name:'页码映射完整性',dimension:'完整性',target:'结构化成果',passRate:90,exceptions:6,lastRun:'2026-06-17 08:00'},
+        {name:'向量索引覆盖率',dimension:'完整性',target:'知识片段',passRate:93,exceptions:5,lastRun:'2026-06-17 08:00'},
+        {name:'敏感信息检测',dimension:'准确性',target:'全文内容',passRate:99,exceptions:1,lastRun:'2026-06-17 08:00'}
+      ]);
+      const qualityExcVisible=ref(false);const qualityExcRule=ref('');const qualityExceptions=ref([]);
+      const openQualityExceptions=(row)=>{
+        qualityExcRule.value=row.name;
+        qualityExceptions.value=Array.from({length:Math.min(row.exceptions,5)},(_,i)=>({
+          resource:['近代教育史料汇编','中医药图鉴·上册','江苏非遗图录','大运河水利史','明代建筑图谱'][i],
+          field:['ISBN','作者','CIP','页码','版权'][i],
+          current:['缺失','待确认','空','未映射','待确认'][i],
+          desc:row.name+'未通过校验',
+          suggestion:'请补全'+row.target+'对应字段',
+          owner:['刘编辑','李审校','王编辑','张校对','陈编辑'][i]
+        }));
+        qualityExcVisible.value=true;
+      };
+      const jumpToFix=(row)=>{
+        qualityExcVisible.value=false;
+        currentPage.value='asset-catalog';
+        const a=assetsData.value.find(x=>x.name===row.resource);
+        if(a){selectAsset(a);openEditMetaDialog()}
+        showToast('已跳转至'+row.resource+'元数据编辑','info');
+      };
+
+      // ===== MOD-18 血缘分析 =====
+      const lineageableAssets=computed(()=>assetsData.value.filter(a=>a.maturityLevel!=='L0'));
+      const lineageResource=ref('');
+      const lineageResourceName=computed(()=>{const a=assetsData.value.find(x=>x.id===lineageResource.value);return a?a.name:''});
+      const lineageNodes=ref([]);
+      const onLineageResourceChange=()=>{
+        const a=assetsData.value.find(x=>x.id===lineageResource.value);
+        if(!a){lineageNodes.value=[];return}
+        lineageNodes.value=[
+          {name:'原始文件',icon:'fa-solid fa-file-pdf',color:'#909399',detail:a.name+'.pdf',taskId:'R'+String(a.id).padStart(3,'0'),batch:'B20260610',page:'-'},
+          {name:'解析任务',icon:'fa-solid fa-gears',color:'#409EFF',detail:'PDF智能解析',taskId:'T202606100'+a.id,batch:'B20260610',page:'全文'},
+          {name:'结构化成果',icon:'fa-solid fa-table-cells',color:'#67C23A',detail:'v'+(a.version||'1.0'),taskId:'SR00'+a.id,batch:'B20260610',page:'42-43'},
+          {name:'向量索引',icon:'fa-solid fa-vector-square',color:'#E6A23C',detail:a.fragments+'片段',taskId:'VI00'+a.id,batch:'B20260610',page:'-'},
+          {name:'RAG回答',icon:'fa-solid fa-robot',color:'#9370DB',detail:'可追溯引用',taskId:'RAG0'+a.id,batch:'-',page:'42'}
+        ];
+      };
+      const lineageDetailVisible=ref(false);const lineageDetailNode=ref(null);
+      const openLineageDetail=(node)=>{lineageDetailNode.value=node;lineageDetailVisible.value=true};
+      const ragReverseLookup=()=>{
+        showToast('RAG引用反查：已列出该资源被引用的所有RAG问答记录','info');
+        addAuditLog({action:'检索',target:'RAG引用反查',detail:'资源：'+lineageResourceName.value});
+      };
+
+      // ===== MOD-16 版权台账（四卡片从 store.copyrightStats 取，与 overview.authorized 同步）=====
+      const copyrightFilter=ref('');const copyrightSearch=ref('');
+      const copyrightSummary=computed(()=>({
+        confirmed:store.copyrightStats.confirmed,
+        pending:store.copyrightStats.pending,
+        expiring:store.copyrightStats.expiring30d,
+        high:store.copyrightStats.highRisk
+      }));
+      const filteredCopyrightData=computed(()=>{
+        return store.copyrightLedger.filter(c=>{
+          if(copyrightSearch.value&&!c.resource.includes(copyrightSearch.value))return false;
+          if(copyrightFilter.value==='confirmed'&&c.status!=='confirmed')return false;
+          if(copyrightFilter.value==='pending'&&c.status!=='pending')return false;
+          if(copyrightFilter.value==='expiring'&&c.status!=='expiring')return false;
+          if(copyrightFilter.value==='high'&&c.risk!=='高')return false;
+          return true;
+        });
+      });
+      const setCopyrightFilter=(f)=>{copyrightFilter.value=copyrightFilter.value===f?'':f};
+
+      // ===== 权限 =====
+      const permissionMatrix=ref([
+        {role:'数据治理管理员',catalog:true,upload:true,struct:true,search:true,ai:true,admin:true},
+        {role:'责任编辑',catalog:true,upload:true,struct:false,search:true,ai:false,admin:false},
+        {role:'校对人员',catalog:false,upload:false,struct:true,search:true,ai:false,admin:false},
+        {role:'审校主管',catalog:true,upload:false,struct:true,search:true,ai:true,admin:false},
+        {role:'外部调用方',catalog:false,upload:false,struct:false,search:true,ai:true,admin:false}
+      ]);
+      const permissionLayers=ref([
+        {name:'功能级',desc:'菜单/按钮可见性控制'},
+        {name:'数据级',desc:'行级/字段级数据过滤'},
+        {name:'资源级',desc:'单本图书授权控制'},
+        {name:'API级',desc:'接口调用鉴权与限流'},
+        {name:'字段级',desc:'敏感字段脱敏与掩码'}
+      ]);
+
+      // ===== MOD-23 审计日志 =====
+      const auditFilterType=ref('');const auditFilterUser=ref('');
+      const filteredAuditLogs=computed(()=>{
+        return store.auditLogs.filter(l=>{
+          if(auditFilterType.value&&l.action!==auditFilterType.value)return false;
+          if(auditFilterUser.value&&!l.user.includes(auditFilterUser.value))return false;
+          return true;
+        });
+      });
+      // 近期审计摘要（时间轴展示，取前 6 条）
+      const auditTimeline=computed(()=>store.auditLogs.slice(0,6));
+      const toggleAuditDetail=(row)=>{/* el-table expand 自动处理 */};
+
+      // ===== 异常预警（绑定 store.alerts）=====
+      const alertData=computed(()=>store.alerts.map(a=>({
+        level:a.level,rule:a.type,user:'—',detail:a.desc,time:a.time,handled:a.status==='已处理'
+      })));
+      const handleAlert=(row)=>{if(!row.handled){row.handled=true;showToast('预警已处理','success')}};
+
+      // ===== MOD-21 API 网关 =====
+      const apiGroups=computed(()=>[
+        {name:'资源服务',icon:'fa-solid fa-database',color:'#409EFF',apis:store.apis.resource},
+        {name:'结构化服务',icon:'fa-solid fa-layer-group',color:'#9B59B6',apis:store.apis.structured},
+        {name:'检索服务',icon:'fa-solid fa-magnifying-glass',color:'#67C23A',apis:store.apis.search},
+        {name:'AI服务',icon:'fa-solid fa-robot',color:'#E6A23C',apis:store.apis.ai},
+        {name:'安全服务',icon:'fa-solid fa-shield-halved',color:'#F56C6C',apis:store.apis.security}
+      ]);
+      const apiTestVisible=ref(false);const apiTestApi=ref(null);const apiTestResponse=ref('');
+      const showApiDoc=(row)=>{showToast('接口文档：'+row.path,'info')};
+      const testApi=(row)=>{
+        apiTestApi.value=row;
+        store.apiCallsTodayTotal++;
+        addAuditLog({action:'API',actionType:'info',target:row.path,detail:'接口测试调用，方法'+row.method});
+        const resp={code:200,message:'success',data:{path:row.path,method:row.method,result:'模拟响应数据',timestamp:new Date().toISOString(),calls:row.callsToday+1}};
+        apiTestResponse.value=JSON.stringify(resp,null,2);
+        apiTestVisible.value=true;
+      };
+
+      // ===== MOD-22 成果回流（初始化自 store，支持交互修改）=====
+      const callbackStructured=ref((store.structuredFlowback||[]).map(cb=>({
+        id:cb.id,title:cb.dataset+' 回流',module:cb.source,time:cb.time,
+        status:cb.status==='回流成功'?'success':cb.status==='失败'?'danger':'pending',
+        statusLabel:cb.status,type:cb.status==='回流成功'?'success':cb.status==='失败'?'danger':'warning',
+        desc:(cb.count?cb.count+'条，':'')+`质量分${cb.qualityScore}`+(cb.failReason?' · '+cb.failReason:'')
+      })));
+      const callbackKnowledge=ref((store.knowledgeFlowback||[]).map(cb=>({
+        id:cb.id,title:cb.dataset+' 回流',module:cb.source,time:cb.time,
+        status:cb.status==='回流成功'?'success':'danger',
+        statusLabel:cb.status,type:cb.status==='回流成功'?'success':'danger',
+        desc:(cb.count?cb.count+'条，':'')+`质量分${cb.qualityScore}`+(cb.failReason?' · '+cb.failReason:'')
+      })));
+      const callbackDetailVisible=ref(false);const callbackDetail=ref(null);
+      const openCallbackDetail=(cb)=>{callbackDetail.value=cb;callbackDetailVisible.value=true};
+      const retryCallback=(cb)=>{
+        cb.status='pending';cb.statusLabel='处理中';cb.type='warning';
+        addAuditLog({action:'管理',target:cb.title,detail:'重试回流'});
+        showToast('已重新发起回流','info');
+        setTimeout(()=>{cb.status='success';cb.statusLabel='已回流';cb.type='success';pushNotif(cb.title+'回流成功','fa-solid fa-check','#67C23A','api-callback')},2000);
+      };
+
+      // ===== 运营反馈（绑定 store 数据）=====
+      const feedbackRagLogs=computed(()=>[
+        {time:'2026-06-17 14:20',query:'明清运河管理',model:'GPT-4',tokens:1280,satisfaction:5},
+        {time:'2026-06-17 13:45',query:'中药材功效',model:'Claude-3',tokens:960,satisfaction:4},
+        {time:'2026-06-17 11:30',query:'非遗保护政策',model:'GPT-4',tokens:1120,satisfaction:3},
+        {time:'2026-06-17 10:15',query:'明代建筑规制',model:'GPT-4',tokens:840,satisfaction:4}
+      ]);
+      // 映射 store.feedbackHotQuestions.question → 模板用的 .query
+      const feedbackHotQuestions=computed(()=>(store.feedbackHotQueries||store.feedbackHotQuestions||[]).map(h=>({
+        query:h.query||h.question,count:h.count,trend:h.trend
+      })));
+
+      // ===== MOD-07 系统设置（绑定 store.systemConfig）=====
+      const orgMode=computed({
+        get:()=>store.systemConfig.orgMode,
+        set:(val)=>{store.systemConfig.orgMode=val}
+      });
+      const orgOverview=computed(()=>[
+        {name:'凤凰科技社',resources:642,calls:2840},
+        {name:'浙大出版社',resources:418,calls:1280},
+        {name:'交大出版社',resources:187,calls:616}
+      ]);
+      const storageEngines=computed(()=>[
+        {name:'对象存储OSS',icon:'fa-solid fa-cloud',color:'#409EFF',status:store.systemConfig.objectStorageStatus,size:'2.4TB'},
+        {name:'ElasticSearch',icon:'fa-solid fa-search',color:'#67C23A',status:store.systemConfig.elasticsearchStatus,size:'180GB'},
+        {name:'向量数据库',icon:'fa-solid fa-vector-square',color:'#E6A23C',status:store.systemConfig.vectorDBStatus,size:'56GB'},
+        {name:'关系数据库',icon:'fa-solid fa-database',color:'#F56C6C',status:'正常',size:'12GB'}
+      ]);
+
+      // ===== 图表渲染（全部从 store 取，口径与各功能页一致）=====
+      let chartInstances={};
+      const renderCharts=()=>{
+        nextTick(()=>{
+          if(currentPage.value!=='dashboard')return;
+          // 趋势图 ← store.ingestTrend
+          const tEl=document.getElementById('chart-trend');
+          if(tEl){
+            const t=echarts.init(tEl,isDark.value?'dark':null);
+            const trend=store.ingestTrend||[];
+            t.setOption({tooltip:{trigger:'axis'},grid:{left:40,right:20,top:30,bottom:30},xAxis:{type:'category',data:trend.map(d=>d.date)},yAxis:{type:'value'},series:[{name:'接入量',type:'line',smooth:true,data:trend.map(d=>d.count),areaStyle:{color:'rgba(64,158,255,.15)'},lineStyle:{color:'#409EFF'},itemStyle:{color:'#409EFF'}}]});
+            chartInstances.trend=t;
+          }
+          // 分布图 ← store.topicDistribution
+          const dEl=document.getElementById('chart-distribution');
+          if(dEl){
+            const d=echarts.init(dEl,isDark.value?'dark':null);
+            const td=store.topicDistribution||[];
+            d.setOption({tooltip:{trigger:'item'},legend:{bottom:0},series:[{type:'pie',radius:['40%','70%'],data:td.map(x=>({value:x.count,name:x.topic})),itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:2}}]});
+            chartInstances.dist=d;
+          }
+          // 状态分布 ← store.processStatusDistribution
+          const sEl=document.getElementById('chart-status');
+          if(sEl){
+            const s=echarts.init(sEl,isDark.value?'dark':null);
+            const ps=store.processStatusDistribution||[];
+            s.setOption({tooltip:{trigger:'item'},series:[{type:'pie',radius:'65%',data:ps.map(x=>({value:x.count,name:x.status,itemStyle:{color:x.color}})),itemStyle:{borderRadius:4}}]});
+            chartInstances.status=s;
+          }
+          // 成熟度 ← store.maturityDistribution
+          const qEl=document.getElementById('chart-quality');
+          if(qEl){
+            const q=echarts.init(qEl,isDark.value?'dark':null);
+            const md=store.maturityDistribution||[];
+            const colors={L0:'#909399',L1:'#409EFF',L2:'#67C23A',L3:'#E6A23C',L4:'#F56C6C'};
+            q.setOption({tooltip:{trigger:'axis'},grid:{left:30,right:15,top:20,bottom:25},xAxis:{type:'category',data:md.map(x=>x.level)},yAxis:{type:'value'},series:[{type:'bar',data:md.map(x=>({value:x.count,itemStyle:{color:colors[x.level]||'#409EFF'}})),barWidth:'50%'}]});
+            chartInstances.quality=q;
+          }
+          // 热词 ← store.hotSearchWords
+          const kEl=document.getElementById('chart-keywords');
+          if(kEl){
+            const k=echarts.init(kEl,isDark.value?'dark':null);
+            const hw=store.hotSearchWords||[];
+            const palette=['#409EFF','#67C23A','#E6A23C','#F56C6C','#9370DB','#8B4513','#409EFF','#67C23A'];
+            const maxC=Math.max(...hw.map(x=>x.count),1);
+            k.setOption({tooltip:{},series:[{type:'graph',layout:'force',force:{repulsion:80},data:hw.map((x,i)=>({name:x.word,value:x.count,symbolSize:18+Math.round(x.count/maxC*30),itemStyle:{color:palette[i%palette.length]}})),label:{show:true},links:[]}]});
+            chartInstances.keywords=k;
+          }
+        });
+      };
+
+      // 监听页面切换渲染图表
+      watch(currentPage,(v)=>{
+        if(v==='dashboard'){renderCharts()}
+        // 窗口resize时重绘
+      });
+      watch(isDark,()=>{Object.values(chartInstances).forEach(c=>c&&c.dispose());chartInstances={};if(currentPage.value==='dashboard')renderCharts()});
+
+      onMounted(()=>{
+        // 主题初始化
+        const saved=localStorage.getItem('kdh-theme');
+        if(saved==='dark'){isDark.value=true;document.documentElement.classList.add('dark')}
+        // 默认渲染
+        setTimeout(renderCharts,300);
+      });
+
+      return{
+      store,
+      isDark,sidebarCollapsed,currentPage,globalSearch,notifPanelOpen,toggleTheme,unreadNotifCount,markAllRead,
+      handleNotifClick,handleMenuSelect,onGlobalSearchEnter,showToast,structuredBookCount,dashboardStats,drillDownStat,topics,
+      activeTopic,assetSearch,filterType,filterStatus,filterMaturity,viewMode,selectedAsset,detailTab,
+      resourceTypes,processStatuses,maturityOptions,assetsData,filteredAssets,selectAsset,pushDialogVisible,onPushToPlatform,
+      confirmPush,openStructResultFromAsset,editMetaDialogVisible,editMetaForm,openEditMetaDialog,saveEditMeta,editAuthDialogVisible,editAuthForm,
+      openEditAuthDialog,saveEditAuth,downloadDialogVisible,downloadTitle,downloadMsg,downloadAllowed,downloadTarget,onDownloadOriginal,
+      onDownloadOriginalFile,confirmDownload,enrollmentData,enrollmentIssues,submitEnrollment,classificationTree,securityLevels,maturityLevels,
+      tagCategories,uploadStep,uploadStatus,uploadStatusType,uploadChecks,businessSystems,uploadDialogVisible,uploadSimulating,
+      startUpload,runUploadSimulation,parseEngines,parseDialogVisible,parseForm,openParseDialog,openParseDialogFor,confirmParse,
+      parseReportVisible,parseReportData,openParseReport,retryParse,calibrationChapters,structItems,mergeSelected,calibHistory,
+      calibHistoryVisible,toggleMergeMode,doMerge,editParaDialogVisible,editParaForm,openEditParagraph,saveEditPara,splitParaDialogVisible,
+      splitParaForm,openSplitParagraph,confirmSplit,submitAuditDialogVisible,submitCalibration,confirmSubmitAudit,approveStructAudit,rejectStructAudit,
+      structLibSearch,structLibMaturity,structFilterTip,structLibData,filteredStructLib,clearStructFilter,viewStructResult,
+      locateOriginalPage,structResultSearch,filteredStructResults,searchQuery,searchResults,searchTip,facets,mockSearchPool,
+      doSearch,pdfPreviewVisible,pdfPreviewPage,pdfPreviewTitle,viewOriginalPage,citationDialogVisible,citationText,generateCitation,
+      copyCitation,ragContext,addToRagContext,ragChats,activeChat,chats,currentChatMessages,chatInput,
+      ragProcessing,ragProcessText,evidenceVisible,citationMode,citationWarnVisible,sourceDetailVisible,sourceDetail,newChat,
+      switchChat,onCitationModeChange,sendChat,openCitationDetail,toggleEvidence,aiModels,agentList,promptTemplates,
+      metadataData,qualityDimensions,qualityRules,qualityExcVisible,qualityExcRule,qualityExceptions,openQualityExceptions,jumpToFix,
+      lineageableAssets,lineageResource,lineageResourceName,lineageNodes,onLineageResourceChange,lineageDetailVisible,lineageDetailNode,
+      openLineageDetail,ragReverseLookup,copyrightFilter,copyrightSearch,copyrightSummary,filteredCopyrightData,setCopyrightFilter,permissionMatrix,
+      permissionLayers,auditFilterType,auditFilterUser,filteredAuditLogs,auditTimeline,toggleAuditDetail,alertData,handleAlert,
+      apiGroups,apiTestVisible,apiTestApi,apiTestResponse,showApiDoc,testApi,callbackStructured,callbackKnowledge,
+      callbackDetailVisible,callbackDetail,openCallbackDetail,retryCallback,feedbackRagLogs,feedbackHotQuestions,orgMode,orgOverview,
+      storageEngines,renderCharts
+    };
+    }
+  });
+  app.use(ElementPlus);
+  app.mount('#app');
+  </script>
+</body>
+</html>
