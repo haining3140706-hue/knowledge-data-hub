@@ -451,14 +451,14 @@
             <div style="font-size:13px;color:#909399;margin-bottom:12px">待补全书目元数据、版权信息与资产状态，完成后提交审批进入资产目录。</div>
             <!-- 顶部统计卡片 -->
             <el-row :gutter="12" style="margin-bottom:16px">
-              <el-col :span="6"><div class="enroll-stat-card"><div class="enroll-stat-num" style="color:#E6A23C">{{ enrollmentStats.missingMeta }}</div><div class="enroll-stat-label">待补全元数据</div></div></el-col>
-              <el-col :span="6"><div class="enroll-stat-card"><div class="enroll-stat-num" style="color:#F56C6C">{{ enrollmentStats.pendingCopyright }}</div><div class="enroll-stat-label">待版权确认</div></div></el-col>
-              <el-col :span="6"><div class="enroll-stat-card"><div class="enroll-stat-num" style="color:#409EFF">{{ enrollmentStats.pendingSubmit }}</div><div class="enroll-stat-label">待提交审批</div></div></el-col>
+              <el-col :span="6"><div class="enroll-stat-card" :class="{clickable:enrollmentStats.missingMeta>0}" @click="showToast('已筛选待补全元数据资源','info')"><div class="enroll-stat-num" style="color:#E6A23C">{{ enrollmentStats.missingMeta }}</div><div class="enroll-stat-label">待补全元数据</div></div></el-col>
+              <el-col :span="6"><div class="enroll-stat-card" :class="{clickable:enrollmentStats.pendingCopyright>0}" @click="showToast('已筛选待版权确认资源','info')"><div class="enroll-stat-num" style="color:#F56C6C">{{ enrollmentStats.pendingCopyright }}</div><div class="enroll-stat-label">待版权确认</div></div></el-col>
+              <el-col :span="6"><div class="enroll-stat-card" :class="{clickable:enrollmentStats.pendingSubmit>0}" @click="showToast('已筛选待提交审批资源','info')"><div class="enroll-stat-num" style="color:#409EFF">{{ enrollmentStats.pendingSubmit }}</div><div class="enroll-stat-label">待提交审批</div></div></el-col>
               <el-col :span="6"><div class="enroll-stat-card"><div class="enroll-stat-num" style="color:#67C23A">{{ enrollmentStats.todayDone }}</div><div class="enroll-stat-label">今日完成编目</div></div></el-col>
             </el-row>
             <el-card>
               <div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-button type="primary" size="small" @click="showToast('新增编目草稿已创建','info')"><i class="fa-solid fa-plus"></i> 新增编目</el-button><el-button size="small" @click="showToast('已下载导入模板','success')"><i class="fa-solid fa-download"></i> 导出模板</el-button></div><el-input size="small" placeholder="搜索资源名称、编码或ISBN..." style="width:240px" clearable/></div>
-              <el-alert v-if="enrollmentIssues.length" type="warning" :closable="false" style="margin-bottom:12px"><template #title><b>编目问题提示</b></template><div v-for="issue in enrollmentIssues" :key="issue" style="font-size:12px;color:#E6A23C"><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px"></i>{{ issue }}</div></el-alert>
+              <el-alert v-if="enrollmentIssues.length" type="warning" :closable="false" style="margin-bottom:12px"><template #title><b>编目问题提示（{{ enrollmentIssues.length }}项）</b></template><div v-for="(issue,i) in enrollmentIssues" :key="i" style="font-size:12px;color:#E6A23C"><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px"></i>{{ issue }}</div></el-alert>
               <el-table :data="enrollmentData" stripe size="small" @row-click="selectEnrollment" highlight-current-row>
                 <el-table-column prop="name" label="资源名称" min-width="140"><template #default="{row}"><el-tooltip :content="row.name" placement="top" :disabled="row.name.length<15"><div style="font-size:13px;font-weight:500;color:#303133;line-height:1.4">{{ row.name }}</div><div style="font-size:11px;color:#909399">{{ row.code }}</div></el-tooltip></template></el-table-column>
                 <el-table-column prop="code" label="资产编码" width="110"/>
@@ -466,21 +466,24 @@
                 <el-table-column label="ISBN/CIP" width="100"><template #default="{row}"><span v-if="row.isbn" style="font-size:12px;color:#67C23A"><i class="fa-solid fa-check" style="margin-right:2px"></i>已补全</span><span v-else style="font-size:12px;color:#F56C6C"><i class="fa-solid fa-circle-exclamation" style="margin-right:2px"></i>缺ISBN</span><div v-if="row.cip==='缺失'" style="font-size:11px;color:#F56C6C;margin-top:2px">缺CIP</div></template></el-table-column>
                 <el-table-column prop="editor" label="责任编辑" width="90"/>
                 <el-table-column prop="copyrightStatus" label="版权状态" width="85"><template #default="{row}"><el-tag size="small" :type="row.copyrightStatus==='已确认'?'success':row.copyrightStatus==='有风险'?'danger':'warning'">{{ row.copyrightStatus }}</el-tag></template></el-table-column>
-                <el-table-column prop="completeness" label="完整率" width="90"><template #default="{row}"><el-progress :percentage="row.completeness" :stroke-width="8" :color="row.completeness>=80?'#67C23A':row.completeness>=50?'#E6A23C':'#F56C6C'"/></template></el-table-column>
+                <el-table-column prop="completeness" label="完整率" width="90"><template #default="{row}"><el-progress :percentage="row.completeness" :stroke-width="8" :color="row.completeness>=80?'#67C23A':row.completeness>=50?'#E6A23C':'#F56C6C"/></template></el-table-column>
                 <el-table-column prop="status" label="当前状态" width="85"><template #default="{row}"><el-tag size="small" :type="row.status==='已发布'?'success':row.status==='待审批'?'primary':row.status==='驳回'?'danger':'warning'">{{ row.status }}</el-tag></template></el-table-column>
                 <el-table-column label="下一步" width="95"><template #default="{row}"><el-button link size="small" :type="row.nextAction==='补全信息'||row.nextAction==='确认版权'?'warning':'primary'" @click="handleNextAction(row)">{{ row.nextAction }}</el-button></template></el-table-column>
               </el-table>
             </el-card>
+            <!-- 右侧资源详情（5区） -->
             <el-card v-if="selectedEnrollment" style="margin-top:16px"><template #header><div class="flex-between"><span style="font-weight:600"><i class="fa-solid fa-circle-info" style="margin-right:6px;color:#409EFF"></i>{{ selectedEnrollment.name }} · 资源详情</span><el-button link type="danger" size="small" @click="selectedEnrollment=null"><i class="fa-solid fa-times"></i></el-button></div></template>
               <el-row :gutter="16">
                 <el-col :span="12">
+                  <!-- 区域一：资产状态 -->
                   <el-card shadow="never" class="mb-12"><template #header><span class="detail-section-title"><i class="fa-solid fa-circle-check" style="color:#67C23A;margin-right:4px"></i>当前资产状态</span></template>
                     <div class="detail-row"><span class="detail-label">当前阶段</span><el-tag size="small" :type="selectedEnrollment.status==='已发布'?'success':selectedEnrollment.status==='待审批'?'primary':'warning'">{{ selectedEnrollment.status }}</el-tag></div>
                     <div class="detail-row"><span class="detail-label">编目完整率</span><span :style="{fontWeight:700,color:selectedEnrollment.completeness>=80?'#67C23A':selectedEnrollment.completeness>=50?'#E6A23C':'#F56C6C'}">{{ selectedEnrollment.completeness }}%</span></div>
                     <div class="detail-row"><span class="detail-label">是否可提交审批</span><span :style="{fontWeight:600,color:selectedEnrollment.completeness>=60?'#67C23A':'#F56C6C'}">{{ selectedEnrollment.completeness>=60?'是':'否' }}</span></div>
-                    <div v-if="selectedEnrollment.completeness<60" class="detail-row"><span class="detail-label">不可提交原因</span><span style="color:#F56C6C">{{!selectedEnrollment.isbn?'ISBN缺失；':''}}{{selectedEnrollment.copyrightStatus!=='已确认'?'版权状态待确认；':''}}</span></div>
+                    <div v-if="selectedEnrollment.completeness<60" class="detail-row"><span class="detail-label">不可提交原因</span><span style="color:#F56C6C">{{!selectedEnrollment.isbn?'ISBN缺失；':''}}{{selectedEnrollment.copyrightStatus!=='已确认'?'版权状态待确认；':'去补全'}}</span></div>
                     <div class="detail-row"><span class="detail-label">下一步建议</span><span style="color:#409EFF;font-weight:500">{{!selectedEnrollment.isbn?'补全ISBN并':'去补全'}}{{selectedEnrollment.copyrightStatus!=='已确认'?'确认版权授权':'提交审批'}}</span></div>
                   </el-card>
+                  <!-- 区域三：版权与授权 -->
                   <el-card shadow="never" class="mb-12"><template #header><span class="detail-section-title"><i class="fa-solid fa-shield-halved" style="color:#E6A23C;margin-right:4px"></i>版权与授权信息</span></template>
                     <div v-for="item in enrollmentAuthItems" :key="item.name" class="detail-row">
                       <span class="detail-label">{{ item.name }}</span>
@@ -492,6 +495,7 @@
                   </el-card>
                 </el-col>
                 <el-col :span="12">
+                  <!-- 区域二：基础出版信息 -->
                   <el-card shadow="never" class="mb-12"><template #header><span class="detail-section-title"><i class="fa-solid fa-book" style="color:#409EFF;margin-right:4px"></i>基础出版信息</span></template>
                     <div class="detail-row"><span class="detail-label">资产编码</span><span>{{ selectedEnrollment.code }}</span></div>
                     <div class="detail-row"><span class="detail-label">ISBN</span><span :style="{color:selectedEnrollment.isbn?'#303133':'#F56C6C'}">{{ selectedEnrollment.isbn||'缺失，待补全' }}</span></div>
@@ -504,7 +508,8 @@
                     <div class="detail-row"><span class="detail-label">所属书系/专题</span><span>{{ selectedEnrollment.series||'—' }}</span></div>
                     <div class="detail-row"><span class="detail-label">文件来源</span><span>{{ selectedEnrollment.source }}</span></div>
                   </el-card>
-                  <el-card shadow="never"><template #header><span class="detail-section-title"><i class="fa-solid fa-list-check" style="color:#409EFF;margin-right:4px"></i>编目完整率明细</span><span style="font-size:11px;color:#909399;margin-left:8px">已完成项/必填项总数</span></template>
+                  <!-- 区域四+五：编目完整率明细 -->
+                  <el-card shadow="never"><template #header><span class="detail-section-title"><i class="fa-solid fa-list-check" style="color:#409EFF;margin-right:4px"></i>编目完整率明细</span><span style="font-size:11px;color:#909399;margin-left:8px">已完成必填项/总必填项 × 100%</span></template>
                     <div v-for="ci in getCompletenessItems(selectedEnrollment)" :key="ci.item" class="detail-row"><span class="detail-label">{{ ci.item }}</span><span :style="{fontWeight:500,color:ci.done?'#67C23A':'#F56C6C'}">{{ ci.done?'已完成':'缺失' }}</span></div>
                   </el-card>
                 </el-col>
