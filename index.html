@@ -582,7 +582,7 @@
             <div class="page-title"><i class="fa-solid fa-gears text-primary"></i> 解析引擎</div>
             <div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>将PDF/Word/EPUB等出版内容自动拆解为章节、段落、图表、公式等结构化对象，为检索与RAG提供基础。</span></div>
             <el-row :gutter="16">
-              <el-col :span="16"><el-card class="mb-16"><template #header><span style="font-weight:600">解析任务队列（联动 store.parseTasks）</span></template>
+              <el-col :span="16"><el-card class="mb-16"><template #header><span style="font-weight:600">解析任务队列</span></template>
                 <el-table :data="store.parseTasks" stripe size="small">
                   <el-table-column prop="bookName" label="图书名称" min-width="140"/><el-table-column prop="pages" label="页数" width="55"/><el-table-column prop="engine" label="解析引擎" width="110"/>
                   <el-table-column prop="ocrAccuracy" label="OCR准确率" width="90"><template #default="{row}"><span style="color:#67C23A">{{ row.ocrAccuracy }}</span></template></el-table-column>
@@ -599,7 +599,7 @@
           <div v-if="currentPage==='struct-calibrate'">
             <div class="calibration-layout">
               <div class="calibration-header">
-                <div style="display:flex;align-items:center;gap:12px"><i class="fa-solid fa-book-open" style="color:#409EFF;font-size:18px"></i><div><div style="font-size:14px;font-weight:600;color:#303133">大运河水利史 · 第三章 运河管理制度</div><div style="font-size:12px;color:#909399">ISBN: 978-7-5343-XXXX-X · 当前第 3/8 章</div></div></div>
+                <div style="display:flex;align-items:center;gap:12px"><i class="fa-solid fa-book-open" style="color:#409EFF;font-size:18px"></i><div><div style="font-size:14px;font-weight:600;color:#303133">大运河水利史 · 第三章 运河管理制度</div><div style="font-size:12px;color:#909399">ISBN: 978-7-5343-0158-6 · 当前第 3/8 章</div></div></div>
                 <div style="flex:1"></div><el-progress :percentage="38" :stroke-width="8" style="width:200px"/><span style="font-size:12px;color:#909399;margin-left:8px">38%</span>
                 <el-button-group><el-button size="small" type="warning" @click="showToast('已暂停校准','warning')"><i class="fa-solid fa-pause"></i> 暂停</el-button><el-button size="small" type="success" @click="submitCalibration"><i class="fa-solid fa-check"></i> 提交审核</el-button></el-button-group>
                 <el-button size="small" @click="calibHistoryVisible=true"><i class="fa-solid fa-clock-rotate-left"></i> 修改历史</el-button>
@@ -693,7 +693,7 @@
           <div v-if="currentPage==='sec-permission'"><div class="page-title"><i class="fa-solid fa-user-shield text-primary"></i> 权限管理</div><el-row :gutter="16"><el-col :span="14"><el-card><template #header><span style="font-weight:600">角色与权限矩阵</span></template><el-table :data="permissionMatrix" stripe size="small" border><el-table-column prop="role" label="角色" width="130" fixed/><el-table-column prop="catalog" label="资产目录" width="70" align="center"><template #default="{row}"><i :class="row.catalog?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="upload" label="资源接入" width="70" align="center"><template #default="{row}"><i :class="row.upload?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="struct" label="结构化" width="70" align="center"><template #default="{row}"><i :class="row.struct?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="search" label="检索" width="60" align="center"><template #default="{row}"><i :class="row.search?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="ai" label="AI/RAG" width="70" align="center"><template #default="{row}"><i :class="row.ai?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column><el-table-column prop="admin" label="系统管理" width="70" align="center"><template #default="{row}"><i :class="row.admin?'fa-solid fa-check text-success':'fa-solid fa-xmark text-danger'"></i></template></el-table-column></el-table></el-card></el-col><el-col :span="10"><el-card><template #header><span style="font-weight:600">五层权限粒度</span></template><div v-for="layer in permissionLayers" :key="layer.name" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5"><div :style="{width:'36px',height:'36px',borderRadius:'8px',background:layer.color,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:'13px'}">{{ layer.level }}</div><div><div style="font-weight:600;font-size:13px;color:#303133">{{ layer.name }}</div><div style="font-size:11px;color:#909399">{{ layer.desc }}</div></div></div></el-card></el-col></el-row></div>
 
           <!-- Audit (MOD-23) -->
-          <div v-if="currentPage==='sec-audit'"><div class="page-title"><i class="fa-solid fa-scroll text-primary"></i> 审计日志</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>Append-Only审计链路，独立审计库，保留≥3年。联动 store.auditLogs，点击行展开详情，筛选实时生效。</span></div><el-row :gutter="16"><el-col :span="16"><el-card><div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-select v-model="auditFilterType" size="small" placeholder="操作类型" clearable style="width:110px"><el-option label="检索" value="检索"/><el-option label="下载" value="下载"/><el-option label="导出" value="导出"/><el-option label="管理" value="管理"/><el-option label="RAG" value="RAG"/><el-option label="API" value="API"/><el-option label="上传" value="上传"/><el-option label="结构化入库" value="结构化入库"/></el-select><el-input v-model="auditFilterUser" size="small" placeholder="操作人" clearable style="width:120px"/></div><el-button size="small" @click="showToast('审计日志已导出','success')"><i class="fa-solid fa-download"></i> 导出日志</el-button></div><el-table :data="filteredAuditLogs" stripe size="small" @row-click="toggleAuditDetail"><el-table-column type="expand"><template #default="{row}"><div style="padding:8px 16px;font-size:12px;color:#606266;background:#fafafa"><b>详情：</b>{{ row.detail }}<br><b>IP：</b>{{ row.ip }}<br><b>结果：</b><span :class="row.success?'text-success':'text-danger'">{{ row.success?'成功':'失败' }}</span></div></template></el-table-column><el-table-column prop="time" label="时间" width="140"/><el-table-column prop="user" label="操作人" width="110"/><el-table-column prop="action" label="类型" width="90"><template #default="{row}"><el-tag size="small" :type="row.actionType">{{ row.action }}</el-tag></template></el-table-column><el-table-column prop="target" label="对象" min-width="130"/><el-table-column prop="detail" label="详情" min-width="150" show-overflow-tooltip/></el-table></el-card></el-col><el-col :span="8"><el-card><template #header><span style="font-weight:600">近期审计摘要</span></template><div style="position:relative;padding-left:20px"><div style="position:absolute;left:6px;top:0;bottom:0;width:2px;background:#e8e8e8"></div><div v-for="item in auditTimeline" :key="item.time" style="position:relative;padding:10px 12px;margin-bottom:8px;background:#fff;border-radius:6px;border:1px solid #ebeef5"><div style="position:absolute;left:-18px;top:14px;width:8px;height:8px;border-radius:50%;border:2px solid #409EFF;background:#fff"></div><div style="font-size:11px;color:#909399">{{ item.time }}</div><div style="font-size:12px;color:#303133;margin-top:2px">{{ item.action }}</div></div></div></el-card></el-col></el-row></div>
+          <div v-if="currentPage==='sec-audit'"><div class="page-title"><i class="fa-solid fa-scroll text-primary"></i> 审计日志</div><div class="biz-desc-card"><i class="fa-solid fa-circle-info"></i><span>Append-Only审计链路，独立审计库，保留≥3年。点击行展开详情，筛选实时生效。</span></div><el-row :gutter="16"><el-col :span="16"><el-card><div class="flex-between mb-16"><div style="display:flex;gap:8px"><el-select v-model="auditFilterType" size="small" placeholder="操作类型" clearable style="width:110px"><el-option label="检索" value="检索"/><el-option label="下载" value="下载"/><el-option label="导出" value="导出"/><el-option label="管理" value="管理"/><el-option label="RAG" value="RAG"/><el-option label="API" value="API"/><el-option label="上传" value="上传"/><el-option label="结构化入库" value="结构化入库"/></el-select><el-input v-model="auditFilterUser" size="small" placeholder="操作人" clearable style="width:120px"/></div><el-button size="small" @click="showToast('审计日志已导出','success')"><i class="fa-solid fa-download"></i> 导出日志</el-button></div><el-table :data="filteredAuditLogs" stripe size="small" @row-click="toggleAuditDetail"><el-table-column type="expand"><template #default="{row}"><div style="padding:8px 16px;font-size:12px;color:#606266;background:#fafafa"><b>详情：</b>{{ row.detail }}<br><b>IP：</b>{{ row.ip }}<br><b>结果：</b><span :class="row.success?'text-success':'text-danger'">{{ row.success?'成功':'失败' }}</span></div></template></el-table-column><el-table-column prop="time" label="时间" width="140"/><el-table-column prop="user" label="操作人" width="110"/><el-table-column prop="action" label="类型" width="90"><template #default="{row}"><el-tag size="small" :type="row.actionType">{{ row.action }}</el-tag></template></el-table-column><el-table-column prop="target" label="对象" min-width="130"/><el-table-column prop="detail" label="详情" min-width="150" show-overflow-tooltip/></el-table></el-card></el-col><el-col :span="8"><el-card><template #header><span style="font-weight:600">近期审计摘要</span></template><div style="position:relative;padding-left:20px"><div style="position:absolute;left:6px;top:0;bottom:0;width:2px;background:#e8e8e8"></div><div v-for="item in auditTimeline" :key="item.time" style="position:relative;padding:10px 12px;margin-bottom:8px;background:#fff;border-radius:6px;border:1px solid #ebeef5"><div style="position:absolute;left:-18px;top:14px;width:8px;height:8px;border-radius:50%;border:2px solid #409EFF;background:#fff"></div><div style="font-size:11px;color:#909399">{{ item.time }}</div><div style="font-size:12px;color:#303133;margin-top:2px">{{ item.action }}</div></div></div></el-card></el-col></el-row></div>
 
           <!-- Alerts -->
           <div v-if="currentPage==='sec-alert'"><div class="page-title"><i class="fa-solid fa-triangle-exclamation text-warning"></i> 异常预警</div><el-card><el-table :data="alertData" stripe size="small"><el-table-column label="级别" width="60"><template #default="{row}"><el-tag size="small" :type="row.level==='高'?'danger':row.level==='中'?'warning':'info'">{{ row.level }}</el-tag></template></el-table-column><el-table-column prop="rule" label="触发规则" min-width="180"/><el-table-column prop="user" label="用户" width="90"/><el-table-column prop="detail" label="详情" min-width="180"/><el-table-column prop="time" label="时间" width="130"/><el-table-column label="状态" width="70"><template #default="{row}"><el-tag size="small" :type="row.handled?'success':'danger'">{{ row.handled?'已处理':'待处理' }}</el-tag></template></el-table-column><el-table-column label="操作" width="80"><template #default="{row}"><el-button link type="primary" size="small" @click="handleAlert(row)">{{ row.handled?'查看':'处理' }}</el-button></template></el-table-column></el-table></el-card></div>
@@ -1117,7 +1117,7 @@
       ];
 
       const assetsData=ref([
-        {id:1,name:'大运河水利史',type:'图书',typeIcon:'fa-solid fa-book',typeColor:'#409EFF',isbn:'978-7-5343-XXXX-X',code:'',author:'王水利',editor:'张编辑',pubDate:'2023-06',clc:'TV882',topic:'历史文献',tags:['运河','水利史','明清'],abstract_:'系统梳理中国大运河的水利管理制度与工程技术演变。',statusKey:'stored',statusLabel:'已入库',maturityLevel:'L3',chapters:8,paragraphs:1284,fragments:3856,esIndexed:true,version:'v1.2',searchCount:342,ragCount:128,apiCount:56,copyrightOwner:'凤凰社',contractNo:'FH20230001',authPeriod:'2023-01至2033-01',aiQA:true,training:true,delivery:true,authRisk:'低',updatedAt:'2026-06-15'},
+        {id:1,name:'大运河水利史',type:'图书',typeIcon:'fa-solid fa-book',typeColor:'#409EFF',isbn:'978-7-5343-0158-6',code:'',author:'王水利',editor:'张编辑',pubDate:'2023-06',clc:'TV882',topic:'历史文献',tags:['运河','水利史','明清'],abstract_:'系统梳理中国大运河的水利管理制度与工程技术演变。',statusKey:'stored',statusLabel:'已入库',maturityLevel:'L3',chapters:8,paragraphs:1284,fragments:3856,esIndexed:true,version:'v1.2',searchCount:342,ragCount:128,apiCount:56,copyrightOwner:'凤凰社',contractNo:'FH20230001',authPeriod:'2023-01至2033-01',aiQA:true,training:true,delivery:true,authRisk:'低',updatedAt:'2026-06-15'},
         {id:2,name:'中医药图鉴·上册',type:'图书',typeIcon:'fa-solid fa-book',typeColor:'#67C23A',isbn:'978-7-5343-YYYY-Y',code:'',author:'李时珍(编)',editor:'李审校',pubDate:'2022-06',clc:'R281',topic:'中医药学',tags:['中药','图鉴','药材'],abstract_:'收录常用中药材图谱与功效说明。',statusKey:'structuring',statusLabel:'结构化中',maturityLevel:'L2',chapters:6,paragraphs:842,fragments:2410,esIndexed:true,version:'v1.0',searchCount:218,ragCount:0,apiCount:34,copyrightOwner:'作者',contractNo:'ZZ20220045',authPeriod:'2022-06至2026-06',aiQA:false,training:false,delivery:false,authRisk:'高',updatedAt:'2026-06-14'},
         {id:3,name:'江苏非遗图录',type:'专题资料',typeIcon:'fa-solid fa-mask',typeColor:'#E6A23C',isbn:'',code:'FY-2024-012',author:'非遗中心',editor:'王编辑',pubDate:'2024-03',clc:'G127',topic:'非遗文化',tags:['非遗','江苏','图录'],abstract_:'江苏省非物质文化遗产图文资料汇编。',statusKey:'calibrating',statusLabel:'校准中',maturityLevel:'L1',chapters:4,paragraphs:412,fragments:1180,esIndexed:false,version:'v0.9',searchCount:89,ragCount:45,apiCount:12,copyrightOwner:'非遗中心',contractNo:'FY20240012',authPeriod:'2024-03至2027-03',aiQA:true,training:false,delivery:true,authRisk:'中',updatedAt:'2026-06-14'},
         {id:4,name:'明代建筑图谱',type:'图片',typeIcon:'fa-solid fa-image',typeColor:'#F56C6C',isbn:'978-7-308-ZZZZ-Z',code:'',author:'建筑研究所',editor:'陈编辑',pubDate:'2021-09',clc:'TU-092',topic:'建筑艺术',tags:['明代','建筑','图谱'],abstract_:'明代官式建筑标准图谱与工程做法。',statusKey:'indexed',statusLabel:'已索引',maturityLevel:'L3',chapters:12,paragraphs:2104,fragments:5620,esIndexed:true,version:'v2.1',searchCount:176,ragCount:82,apiCount:28,copyrightOwner:'浙大社',contractNo:'ZD20210088',authPeriod:'2021-09至2026-07',aiQA:true,training:true,delivery:true,authRisk:'中',updatedAt:'2026-06-05'},
@@ -1236,7 +1236,7 @@
 
       // ===== 资产编目（重构 v2.0：顶部统计卡片 + 9字段列表 + 5区详情）=====
       const enrollmentData=ref([
-        {code:'AC-2026-001',name:'大运河水利史',type:'图书',isbn:'978-7-5343-XXXX-X',cip:'已登记',author:'王水利',editor:'张某某',pubDate:'2024-03',clc:'TV882',series:'水利工程/运河专题',source:'原始PDF',copyrightStatus:'已确认',completeness:95,status:'已发布',nextAction:'查看详情',risk:'低'},
+        {code:'AC-2026-001',name:'大运河水利史',type:'图书',isbn:'978-7-5343-0158-6',cip:'已登记',author:'王水利',editor:'张某某',pubDate:'2024-03',clc:'TV882',series:'水利工程/运河专题',source:'原始PDF',copyrightStatus:'已确认',completeness:95,status:'已发布',nextAction:'查看详情',risk:'低'},
         {code:'AC-2026-002',name:'中医药图鉴·上册',type:'图书',isbn:'978-7-5343-YYYY-Y',cip:'缺失',author:'李时珍(编)',editor:'待指定',pubDate:'2023-11',clc:'R281',series:'医药教材',source:'ERP导入',copyrightStatus:'已确认',completeness:82,status:'待补全',nextAction:'确认版权',risk:'低'},
         {code:'AC-2026-003',name:'近代教育史料汇编',type:'图书',isbn:'',cip:'缺失',author:'教育研究所',editor:'待指定',pubDate:'2024-08',clc:'G529',series:'教育史料',source:'手工导入',copyrightStatus:'待确认',completeness:45,status:'草稿',nextAction:'补全信息',risk:'中'},
         {code:'AC-2026-004',name:'明代建筑图谱',type:'图片',isbn:'978-7-5343-AAAA-A',cip:'已登记',author:'陈建华',editor:'李主任',pubDate:'2023-06',clc:'TU-0',series:'古建筑',source:'原始PDF',copyrightStatus:'已确认',completeness:98,status:'待审批',nextAction:'提交审批',risk:'低'},
@@ -1710,11 +1710,10 @@
 
       // ===== MOD-18 血缘分析 =====
       const lineageableAssets=computed(()=>assetsData.value.filter(a=>a.maturityLevel!=='L0'));
-      const lineageResource=ref('');
+      const lineageResource=ref(assetsData.value[0]?assetsData.value[0].id:'');
       const lineageResourceName=computed(()=>{const a=assetsData.value.find(x=>x.id===lineageResource.value);return a?a.name:''});
       const lineageNodes=ref([]);
-      const onLineageResourceChange=()=>{
-        const a=assetsData.value.find(x=>x.id===lineageResource.value);
+      const loadLineage=(a)=>{
         if(!a){lineageNodes.value=[];return}
         lineageNodes.value=[
           {name:'原始文件',icon:'fa-solid fa-file-pdf',color:'#909399',detail:a.name+'.pdf',taskId:'R'+String(a.id).padStart(3,'0'),batch:'B20260610',page:'-'},
@@ -1724,6 +1723,7 @@
           {name:'RAG回答',icon:'fa-solid fa-robot',color:'#9370DB',detail:'可追溯引用',taskId:'RAG0'+a.id,batch:'-',page:'42'}
         ];
       };
+      const onLineageResourceChange=()=>{const a=assetsData.value.find(x=>x.id===lineageResource.value);loadLineage(a)};
       const lineageDetailVisible=ref(false);const lineageDetailNode=ref(null);
       const openLineageDetail=(node)=>{lineageDetailNode.value=node;lineageDetailVisible.value=true};
       const ragReverseLookup=()=>{
@@ -1784,7 +1784,7 @@
       const alertData=computed(()=>store.alerts.map(a=>({
         level:a.level,rule:a.type,user:'—',detail:a.desc,time:a.time,handled:a.status==='已处理'
       })));
-      const handleAlert=(row)=>{if(!row.handled){row.handled=true;showToast('预警已处理','success')}};
+      const handleAlert=(row)=>{if(!row.handled){const a=store.alerts.find(x=>x.time===row.time&&x.type===row.rule);if(a){a.status='已处理';showToast('预警已处理','success');addAuditLog({action:'管理',target:a.resource,detail:'预警已处理'})}}};
 
       // ===== MOD-21 API 网关 =====
       const apiGroups=computed(()=>[
@@ -1850,10 +1850,10 @@
         {name:'交大出版社',resources:187,calls:616}
       ]);
       const storageEngines=computed(()=>[
-        {name:'对象存储OSS',icon:'fa-solid fa-cloud',color:'#409EFF',status:store.systemConfig.objectStorageStatus,size:'2.4TB'},
-        {name:'ElasticSearch',icon:'fa-solid fa-search',color:'#67C23A',status:store.systemConfig.elasticsearchStatus,size:'180GB'},
-        {name:'向量数据库',icon:'fa-solid fa-vector-square',color:'#E6A23C',status:store.systemConfig.vectorDBStatus,size:'56GB'},
-        {name:'关系数据库',icon:'fa-solid fa-database',color:'#F56C6C',status:'正常',size:'12GB'}
+        {name:'对象存储OSS',icon:'fa-solid fa-cloud',color:'#409EFF',active:true,version:'v3.2.1 · 2.4TB'},
+        {name:'ElasticSearch',icon:'fa-solid fa-search',color:'#67C23A',active:true,version:'v8.11 · 180GB'},
+        {name:'向量数据库',icon:'fa-solid fa-vector-square',color:'#E6A23C',active:true,version:'v2.3 · 56GB'},
+        {name:'关系数据库',icon:'fa-solid fa-database',color:'#F56C6C',active:true,version:'v14.0 · 12GB'}
       ]);
 
       // ===== 图表渲染（全部从 store 取，口径与各功能页一致）=====
@@ -1920,6 +1920,9 @@
         if(saved==='dark'){isDark.value=true;document.documentElement.classList.add('dark')}
         // 默认渲染
         setTimeout(renderCharts,300);
+        // 血缘分析默认加载
+        const firstAsset=assetsData.value[0];
+        if(firstAsset&&lineageNodes.value.length===0)loadLineage(firstAsset);
       });
 
       return{
